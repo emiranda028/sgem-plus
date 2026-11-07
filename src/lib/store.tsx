@@ -34,6 +34,7 @@ interface Store {
   updateOrden: (id: number, patch: Partial<OrdenServicio>) => void
   addAccion: (ordenId: number, nota: string) => void
   updateEquipo: (id: number, patch: Partial<Equipo>) => void
+  generarPlan: (clienteId: number) => number
   log: (accion: string, detalle: string) => void
 }
 
@@ -129,6 +130,44 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setDb((d) => ({ ...d, equipos: d.equipos.map((e) => (e.id === id ? { ...e, ...patch } : e)) }))
   }, [])
 
+  // Genera órdenes de MP/certificación para los vencimientos sin una OS abierta de ese tipo.
+  const generarPlan = useCallback((clienteId: number) => {
+    const now = new Date()
+    const nowISO = now.toISOString()
+    const dentro = (iso: string) => (new Date(iso).getTime() - now.getTime()) / 86400000 <= 30
+    let seq = 0
+    const nuevas: OrdenServicio[] = []
+    const base = Math.max(0, ...db.ordenes.map((x) => x.id))
+    const eqs = db.equipos.filter((e) => e.clienteId === clienteId && e.estado !== 'BAJA')
+    const abiertasPorEquipo = (equipoId: number, tipo: string) =>
+      db.ordenes.some((o) => o.equipoId === equipoId && o.situacion !== 'Cerrada' && o.tipo === tipo) ||
+      nuevas.some((o) => o.equipoId === equipoId && o.tipo === tipo)
+
+    const mk = (e: Equipo, tipo: 'Mantenimiento preventivo' | 'Certificación') => {
+      seq++
+      nuevas.push({
+        id: base + seq,
+        numero: `OS-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(5000 + base + seq)}`,
+        clienteId, equipoId: e.id, servicioId: e.servicioId, tipo,
+        titulo: `${tipo}: ${e.tipo} ${e.fabricante}`, descripcion: 'Generada automáticamente por plan de vencimientos.',
+        criticidad: e.criticidad, situacion: 'Abierta', taller: db.talleres[0], tecnico: 'sistema',
+        aperturaISO: nowISO, cierreISO: null, origen: 'Interna', fotos: 0,
+        acciones: [{ id: 1, fechaISO: nowISO, usuario: 'sistema', nota: 'Orden generada por el plan automático.' }],
+      } as OrdenServicio)
+    }
+    for (const e of eqs) {
+      const c = db.certificaciones.find((x) => x.equipoId === e.id)
+      if (c && dentro(c.vencimientoISO) && !abiertasPorEquipo(e.id, 'Certificación')) mk(e, 'Certificación')
+      const m = db.mantenimientos.find((x) => x.equipoId === e.id)
+      if (m && dentro(m.proximoISO) && !abiertasPorEquipo(e.id, 'Mantenimiento preventivo')) mk(e, 'Mantenimiento preventivo')
+    }
+    if (nuevas.length) {
+      setDb((d) => ({ ...d, ordenes: [...nuevas, ...d.ordenes] }))
+      log('Plan automático', `Generó ${nuevas.length} órdenes de mantenimiento/certificación.`)
+    }
+    return nuevas.length
+  }, [db, log])
+
   const clientesVisibles = useMemo(() => {
     const list = user?.rol === 'CLIENTE' ? db.clientes.filter((c) => user.clienteIds.includes(c.id)) : db.clientes
     return [...list].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
@@ -137,7 +176,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value: Store = {
     db, user, cliente, clientesVisibles,
     login, logout, setCliente, resetDemo,
-    addOrden, updateOrden, addAccion, updateEquipo, log,
+    addOrden, updateOrden, addAccion, updateEquipo, generarPlan, log,
   }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

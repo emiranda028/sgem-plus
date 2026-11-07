@@ -122,6 +122,7 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
   const { db, addAccion, updateOrden } = useStore()
   const equipo = db.equipos.find((e) => e.id === orden.equipoId) ?? null
   const cliente = db.clientes.find((c) => c.id === orden.clienteId)!
+  const tecnicos = useMemo(() => [...new Set([orden.tecnico, ...db.ordenes.map((o) => o.tecnico)].filter((t) => t && t !== 'sistema'))].sort(), [db.ordenes, orden.tecnico])
   const [nota, setNota] = useState('')
   const [firmando, setFirmando] = useState(false)
   const [firma, setFirma] = useState('')
@@ -185,11 +186,23 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
           </div>
 
           {puedeEditar && (
-            <div className="field">
-              <label>Cambiar situación</label>
-              <select value={orden.situacion} onChange={(e) => { const s = e.target.value as SituacionOS; updateOrden(orden.id, { situacion: s, cierreISO: s === 'Cerrada' ? new Date().toISOString() : null }) }}>
-                {SITU.map((s) => <option key={s}>{s}</option>)}
-              </select>
+            <div className="grid-2" style={{ gap: 12 }}>
+              <div className="field">
+                <label>Situación</label>
+                <select value={orden.situacion} onChange={(e) => { const s = e.target.value as SituacionOS; updateOrden(orden.id, { situacion: s, cierreISO: s === 'Cerrada' ? new Date().toISOString() : null }) }}>
+                  {SITU.map((s) => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label>Programar visita</label>
+                <input type="date" value={orden.programadaISO ? orden.programadaISO.slice(0, 10) : ''} onChange={(e) => updateOrden(orden.id, { programadaISO: e.target.value ? new Date(e.target.value + 'T09:00:00').toISOString() : undefined })} />
+              </div>
+              <div className="field">
+                <label>Técnico asignado</label>
+                <select value={orden.tecnico} onChange={(e) => updateOrden(orden.id, { tecnico: e.target.value })}>
+                  {tecnicos.map((t) => <option key={t}>{t}</option>)}
+                </select>
+              </div>
             </div>
           )}
 

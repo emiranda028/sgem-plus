@@ -13,6 +13,8 @@ const Taller = lazy(() => import('./pages/Taller'))
 const Vencimientos = lazy(() => import('./pages/Vencimientos'))
 const Etiquetas = lazy(() => import('./pages/Etiquetas'))
 const Notificaciones = lazy(() => import('./pages/Notificaciones'))
+const Agenda = lazy(() => import('./pages/Agenda'))
+const Reportes = lazy(() => import('./pages/Reportes'))
 const Portal = lazy(() => import('./pages/Portal'))
 const Auditoria = lazy(() => import('./pages/Auditoria'))
 const Configuracion = lazy(() => import('./pages/Configuracion'))
@@ -39,6 +41,8 @@ export default function App() {
         <Route path="ordenes" element={<Suspense fallback={<Load />}><Ordenes /></Suspense>} />
         <Route path="equipos" element={<Suspense fallback={<Load />}><Equipos /></Suspense>} />
         <Route path="taller" element={<Suspense fallback={<Load />}><Taller /></Suspense>} />
+        <Route path="agenda" element={<Suspense fallback={<Load />}><Agenda /></Suspense>} />
+        <Route path="reportes" element={<Suspense fallback={<Load />}><Reportes /></Suspense>} />
         <Route path="etiquetas" element={<Suspense fallback={<Load />}><Etiquetas /></Suspense>} />
         <Route path="vencimientos" element={<Suspense fallback={<Load />}><Vencimientos /></Suspense>} />
         <Route path="notificaciones" element={<Suspense fallback={<Load />}><Notificaciones /></Suspense>} />

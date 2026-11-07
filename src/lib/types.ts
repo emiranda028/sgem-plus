@@ -108,6 +108,7 @@ export interface OrdenServicio {
   firmante?: string
   origen?: 'Interna' | 'Portal'
   protocolo?: Protocolo
+  programadaISO?: string
 }
 
 export interface ProtocoloItem {

@@ -162,6 +162,69 @@ export async function informeEnsayoPDF(o: OrdenServicio, equipo: Equipo | null, 
   doc.save(`Informe_ensayo_${o.numero}.pdf`)
 }
 
+export interface ReporteData {
+  periodo: string
+  equipos: number
+  certVig: number
+  mpVig: number
+  abiertas: number
+  cerradasMes: number
+  mttr: number
+  sla: number
+  porTipo: { name: string; value: number }[]
+  topEquipos: { name: string; value: number }[]
+}
+
+export function reporteGerencialPDF(cliente: Cliente, r: ReporteData) {
+  const doc = new jsPDF()
+  header(doc, 'INFORME DE GESTIÓN', r.periodo)
+  let y = 44
+  doc.setTextColor(...INK); doc.setFont('helvetica', 'bold'); doc.setFontSize(14)
+  doc.text(cliente.nombre, 16, y); y += 6
+  doc.setTextColor(...SOFT); doc.setFont('helvetica', 'normal'); doc.setFontSize(9)
+  doc.text(`Resumen de gestión del equipamiento · ${r.periodo}`, 16, y); y += 12
+
+  const tiles: [string, string][] = [
+    ['Equipos activos', String(r.equipos)],
+    ['Certificaciones vigentes', `${r.certVig}%`],
+    ['Preventivos vigentes', `${r.mpVig}%`],
+    ['Órdenes abiertas', String(r.abiertas)],
+    ['Cerradas en el período', String(r.cerradasMes)],
+    ['Tiempo medio de reparación', `${r.mttr} días`],
+    ['Cumplimiento de SLA', `${r.sla}%`],
+  ]
+  const tw = 56, th = 22, gap = 5
+  tiles.forEach((t, i) => {
+    const col = i % 3, row = Math.floor(i / 3)
+    const x = 16 + col * (tw + gap), ty = y + row * (th + gap)
+    doc.setDrawColor(224, 231, 233); doc.roundedRect(x, ty, tw, th, 2, 2, 'S')
+    doc.setTextColor(...SOFT); doc.setFontSize(7); doc.setFont('helvetica', 'normal')
+    doc.text(t[0].toUpperCase(), x + 4, ty + 7)
+    doc.setTextColor(11, 122, 144); doc.setFont('helvetica', 'bold'); doc.setFontSize(15)
+    doc.text(t[1], x + 4, ty + 17)
+  })
+  y += Math.ceil(tiles.length / 3) * (th + gap) + 8
+
+  const section = (title: string, rows: { name: string; value: number }[], yy: number) => {
+    doc.setTextColor(...INK); doc.setFont('helvetica', 'bold'); doc.setFontSize(11)
+    doc.text(title, 16, yy); yy += 6
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5)
+    const max = Math.max(1, ...rows.map((r2) => r2.value))
+    for (const r2 of rows.slice(0, 8)) {
+      doc.setTextColor(...INK); doc.text(r2.name, 16, yy + 4)
+      doc.setFillColor(222, 240, 243); doc.rect(95, yy, 70, 4.5, 'F')
+      doc.setFillColor(11, 122, 144); doc.rect(95, yy, (70 * r2.value) / max, 4.5, 'F')
+      doc.setTextColor(...SOFT); doc.text(String(r2.value), 170, yy + 4)
+      yy += 9
+    }
+    return yy + 6
+  }
+  y = section('Órdenes por tipo', r.porTipo, y)
+  section('Equipos con más órdenes', r.topEquipos, y)
+  footer(doc)
+  doc.save(`Informe_gestion_${cliente.corto}.pdf`)
+}
+
 export async function etiquetasPDF(equipos: Equipo[], clienteNombre: string) {
   const doc = new jsPDF()
   // precalcular QRs

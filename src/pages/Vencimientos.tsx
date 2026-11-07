@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { CalendarClock, ChevronLeft, ChevronRight, Download, ShieldCheck } from 'lucide-react'
+import { CalendarClock, ChevronLeft, ChevronRight, Download, ShieldCheck, Zap } from 'lucide-react'
 import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, startOfMonth, startOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Page } from '../components/Layout'
@@ -73,8 +73,10 @@ function Calendario({ alertas, onDay }: { alertas: Alerta[]; onDay: (d: Date) =>
 }
 
 function Vencimientos({ clienteId }: { clienteId: number }) {
-  const { cliente } = useStore()
+  const { cliente, generarPlan } = useStore()
   const alertas = useAlertas(clienteId)
+  const [generadas, setGeneradas] = useState<number | null>(null)
+  const generar = () => setGeneradas(generarPlan(clienteId))
   const [filtro, setFiltro] = useState<'Todos' | 'Certificación' | 'Mantenimiento'>('Todos')
   const [view, setView] = useState<'lista' | 'calendario'>('lista')
   const [dia, setDia] = useState<Date | null>(null)
@@ -98,7 +100,14 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
       actions={<>
         <div className="seg"><button className={view === 'lista' ? 'on' : ''} onClick={() => setView('lista')}>Lista</button><button className={view === 'calendario' ? 'on' : ''} onClick={() => { setView('calendario'); setDia(null) }}>Calendario</button></div>
         <button className="btn secondary" onClick={download} disabled={!rows.length}><Download size={16} /> Exportar</button>
+        <button className="btn primary" onClick={generar}><Zap size={16} /> Generar órdenes</button>
       </>}>
+      {generadas !== null && (
+        <div className="card pad" style={{ display: 'flex', alignItems: 'center', gap: 10, background: generadas ? 'var(--ok-soft)' : 'var(--surface-2)', borderColor: 'transparent' }}>
+          <Zap size={18} style={{ color: generadas ? 'var(--ok)' : 'var(--text-3)' }} />
+          <span style={{ fontWeight: 500 }}>{generadas ? `Se generaron ${generadas} órdenes automáticas para los vencimientos próximos.` : 'No hay vencimientos nuevos para generar: ya tienen una orden abierta.'}</span>
+        </div>
+      )}
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
         <Kpi label="Total a atender" value={alertas.length} tone="warn" icon={<CalendarClock size={18} />} hint={`${vencidos} ya vencidos`} />
         <Kpi label="Certificaciones" value={cert} tone="info" icon={<ShieldCheck size={18} />} />
