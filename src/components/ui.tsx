@@ -1,0 +1,107 @@
+import type { ReactNode } from 'react'
+import { AlertTriangle, Inbox } from 'lucide-react'
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import type { EstadoEquipo, EstadoVig } from '../lib/types'
+import { pct } from '../lib/format'
+
+type Tone = 'brand' | 'ok' | 'warn' | 'danger' | 'info' | 'accent' | 'neutral'
+
+export function Badge({ children, tone = 'neutral', dot }: { children: ReactNode; tone?: Tone; dot?: boolean }) {
+  return (
+    <span className={`badge ${tone === 'neutral' ? '' : 'tone-' + tone}`}>
+      {dot && <span className="dot" />}
+      {children}
+    </span>
+  )
+}
+
+export function Kpi({ label, value, hint, tone = 'brand', icon }: { label: string; value: ReactNode; hint?: ReactNode; tone?: Tone; icon?: ReactNode }) {
+  return (
+    <div className={`kpi tone-${tone}`}>
+      <div className="top">
+        <span className="lbl">{label}</span>
+        {icon && <span className="ic">{icon}</span>}
+      </div>
+      <div className="val mono">{value}</div>
+      {hint && <div className="hint">{hint}</div>}
+    </div>
+  )
+}
+
+export function Progress({ value, tone = 'brand' }: { value: number; tone?: Tone }) {
+  return (
+    <div className={`progress tone-${tone}`}>
+      <span style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
+    </div>
+  )
+}
+
+export function EmptyState({ icon, children = 'Sin datos para mostrar.' }: { icon?: ReactNode; children?: ReactNode }) {
+  return (
+    <div className="state">
+      <span className="ic">{icon ?? <Inbox size={22} />}</span>
+      <span>{children}</span>
+    </div>
+  )
+}
+
+export function ErrorState({ children }: { children: ReactNode }) {
+  return (
+    <div className="state" style={{ color: 'var(--danger)' }}>
+      <span className="ic" style={{ background: 'var(--danger-soft)', color: 'var(--danger)' }}><AlertTriangle size={22} /></span>
+      <span>{children}</span>
+    </div>
+  )
+}
+
+const ESTADO_TONE: Record<EstadoEquipo, Tone> = {
+  OPERATIVO: 'ok',
+  'EN TALLER': 'warn',
+  'FUERA DE SERVICIO': 'danger',
+  BAJA: 'neutral',
+}
+export function EstadoBadge({ estado }: { estado: EstadoEquipo }) {
+  return <Badge tone={ESTADO_TONE[estado]} dot>{estado}</Badge>
+}
+
+const VIG_TONE: Record<EstadoVig, Tone> = { VIGENTE: 'ok', POR_VENCER: 'warn', VENCIDO: 'danger', NA: 'neutral' }
+const VIG_TXT: Record<EstadoVig, string> = { VIGENTE: 'Vigente', POR_VENCER: 'Por vencer', VENCIDO: 'Vencido', NA: 'No aplica' }
+export function VigBadge({ estado }: { estado: EstadoVig }) {
+  if (estado === 'NA') return <span className="faint small">No aplica</span>
+  return <Badge tone={VIG_TONE[estado]}>{VIG_TXT[estado]}</Badge>
+}
+
+export function Donut({ rows, colors, center }: { rows: { name: string; value: number }[]; colors: string[]; center?: { top: string; bottom: string } }) {
+  const total = rows.reduce((a, r) => a + r.value, 0)
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: 18, alignItems: 'center' }}>
+      <div style={{ position: 'relative' }}>
+        <ResponsiveContainer width="100%" height={170}>
+          <PieChart>
+            <Pie data={rows} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={52} outerRadius={78} paddingAngle={2} stroke="var(--surface)" strokeWidth={2} isAnimationActive={false}>
+              {rows.map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)}
+            </Pie>
+            <Tooltip formatter={(v: number) => [`${v} (${pct(v, total)}%)`, '']} contentStyle={{ borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
+          </PieChart>
+        </ResponsiveContainer>
+        {center && (
+          <div style={{ position: 'absolute', inset: 0, display: 'grid', placeContent: 'center', textAlign: 'center', pointerEvents: 'none' }}>
+            <strong style={{ fontFamily: 'var(--ff-d)', fontSize: 24 }}>{center.top}</strong>
+            <small className="faint">{center.bottom}</small>
+          </div>
+        )}
+      </div>
+      <ul className="legend">
+        {rows.map((r, i) => (
+          <li key={r.name}>
+            <i style={{ background: colors[i % colors.length] }} />
+            <span className="muted">{r.name}</span>
+            <span className="v mono">{r.value}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+export const CHART_COLORS = ['#0e7490', '#4f46e5', '#15a34a', '#d4820a', '#13a7c6', '#db2777', '#64748b']
