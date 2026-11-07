@@ -11,6 +11,7 @@ const Equipos = lazy(() => import('./pages/Equipos'))
 const Ordenes = lazy(() => import('./pages/Ordenes'))
 const Taller = lazy(() => import('./pages/Taller'))
 const Vencimientos = lazy(() => import('./pages/Vencimientos'))
+const Etiquetas = lazy(() => import('./pages/Etiquetas'))
 const Portal = lazy(() => import('./pages/Portal'))
 const Auditoria = lazy(() => import('./pages/Auditoria'))
 const Configuracion = lazy(() => import('./pages/Configuracion'))
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="ordenes" element={<Suspense fallback={<Load />}><Ordenes /></Suspense>} />
         <Route path="equipos" element={<Suspense fallback={<Load />}><Equipos /></Suspense>} />
         <Route path="taller" element={<Suspense fallback={<Load />}><Taller /></Suspense>} />
+        <Route path="etiquetas" element={<Suspense fallback={<Load />}><Etiquetas /></Suspense>} />
         <Route path="vencimientos" element={<Suspense fallback={<Load />}><Vencimientos /></Suspense>} />
         <Route path="portal" element={<Suspense fallback={<Load />}><Portal /></Suspense>} />
         <Route path="auditoria" element={<Suspense fallback={<Load />}><Auditoria /></Suspense>} />

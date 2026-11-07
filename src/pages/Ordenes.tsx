@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Download, FileSignature, Plus, Search, X } from 'lucide-react'
+import { useRef } from 'react'
+import { Camera, Download, FileSignature, Plus, Search, Trash2, X } from 'lucide-react'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { Badge, EmptyState } from '../components/ui'
@@ -122,6 +123,27 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
   const [firmando, setFirmando] = useState(false)
   const [firma, setFirma] = useState('')
   const [firmante, setFirmante] = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
+  const fotos = orden.fotosData ?? []
+
+  const onFiles = (files: FileList | null) => {
+    if (!files) return
+    const list = [...files].slice(0, 6)
+    let pending = list.length
+    const nuevas: string[] = []
+    for (const f of list) {
+      const r = new FileReader()
+      r.onload = () => {
+        nuevas.push(String(r.result))
+        if (--pending === 0) {
+          updateOrden(orden.id, { fotosData: [...fotos, ...nuevas].slice(0, 12) })
+          addAccion(orden.id, `Adjuntó ${nuevas.length} foto(s).`)
+        }
+      }
+      r.readAsDataURL(f)
+    }
+  }
+  const quitarFoto = (i: number) => updateOrden(orden.id, { fotosData: fotos.filter((_, j) => j !== i) })
 
   return (
     <>
@@ -165,6 +187,24 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <input className="search" style={{ flex: 1 }} placeholder="Agregar una acción…" value={nota} onChange={(e) => setNota(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && nota.trim()) { addAccion(orden.id, nota.trim()); setNota('') } }} />
                 <button className="btn secondary" disabled={!nota.trim()} onClick={() => { addAccion(orden.id, nota.trim()); setNota('') }}>Agregar</button>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <b style={{ fontSize: 14 }}>Fotos {fotos.length > 0 && <span className="faint small">({fotos.length})</span>}</b>
+              {puedeEditar && <button className="btn secondary sm" onClick={() => fileRef.current?.click()}><Camera size={15} /> Agregar</button>}
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" capture="environment" multiple hidden onChange={(e) => { onFiles(e.target.files); e.target.value = '' }} />
+            {fotos.length === 0 ? <span className="faint small">Sin fotos. {puedeEditar && 'Sacá o adjuntá fotos del equipo o del trabajo.'}</span> : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px,1fr))', gap: 8 }}>
+                {fotos.map((src, i) => (
+                  <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: 9, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                    <img src={src} alt={`foto ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {puedeEditar && <button className="icon-btn" onClick={() => quitarFoto(i)} style={{ position: 'absolute', top: 2, right: 2, width: 24, height: 24, background: 'rgba(0,0,0,.55)', color: '#fff' }}><Trash2 size={13} /></button>}
+                  </div>
+                ))}
               </div>
             )}
           </div>

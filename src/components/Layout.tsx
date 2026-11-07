@@ -1,7 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import {
   Boxes, ClipboardList, LayoutDashboard, LogOut, Moon, Settings2, Stethoscope,
-  Sun, Wrench, CalendarClock, Building2, ScrollText,
+  Sun, Wrench, CalendarClock, Building2, ScrollText, QrCode,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import ClientPicker from './ClientPicker'
@@ -37,6 +37,7 @@ export default function Layout() {
             { to: '/ordenes', label: 'Órdenes de servicio', icon: ClipboardList, count: abiertas },
             { to: '/equipos', label: 'Equipos', icon: Stethoscope },
             { to: '/taller', label: 'Taller', icon: Wrench },
+            { to: '/etiquetas', label: 'Etiquetas QR', icon: QrCode },
           ],
         },
         {

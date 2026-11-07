@@ -103,6 +103,7 @@ export interface OrdenServicio {
   cierreISO: string | null
   acciones: AccionOS[]
   fotos: number
+  fotosData?: string[]
   firmaDataUrl?: string
   firmante?: string
 }

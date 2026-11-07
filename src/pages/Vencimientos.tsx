@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
-import { CalendarClock, Download, ShieldCheck } from 'lucide-react'
+import { CalendarClock, ChevronLeft, ChevronRight, Download, ShieldCheck } from 'lucide-react'
+import { addMonths, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, startOfMonth, startOfWeek } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { Badge, EmptyState, Kpi } from '../components/ui'
 import { useAlertas, useStore, type Alerta } from '../lib/store'
-import { diasHasta, fecha } from '../lib/format'
+import { NOW, diasHasta, fecha } from '../lib/format'
 import { exportCsv } from '../lib/csv'
 
 function grupo(a: Alerta): string {
@@ -15,11 +17,67 @@ function grupo(a: Alerta): string {
   return 'Más adelante'
 }
 const ORDEN = ['Vencidos', 'Esta semana', 'Este mes', 'Más adelante']
+const DOW = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+
+function Calendario({ alertas, onDay }: { alertas: Alerta[]; onDay: (d: Date) => void }) {
+  const [cursor, setCursor] = useState(() => startOfMonth(NOW))
+  const dias = useMemo(() => {
+    const start = startOfWeek(startOfMonth(cursor), { weekStartsOn: 1 })
+    const end = endOfWeek(endOfMonth(cursor), { weekStartsOn: 1 })
+    return eachDayOfInterval({ start, end })
+  }, [cursor])
+  const porDia = useMemo(() => {
+    const m = new Map<string, Alerta[]>()
+    for (const a of alertas) {
+      const k = a.vencimientoISO.slice(0, 10)
+      if (!m.has(k)) m.set(k, [])
+      m.get(k)!.push(a)
+    }
+    return m
+  }, [alertas])
+
+  return (
+    <div className="card pad cal">
+      <div className="cal-head">
+        <div className="cal-title">{format(cursor, 'MMMM yyyy', { locale: es })}</div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button className="icon-btn" onClick={() => setCursor((c) => addMonths(c, -1))}><ChevronLeft size={18} /></button>
+          <button className="btn secondary sm" onClick={() => setCursor(startOfMonth(NOW))}>Hoy</button>
+          <button className="icon-btn" onClick={() => setCursor((c) => addMonths(c, 1))}><ChevronRight size={18} /></button>
+        </div>
+      </div>
+      <div className="cal-grid">
+        {DOW.map((d) => <div key={d} className="cal-dow">{d}</div>)}
+        {dias.map((day) => {
+          const k = format(day, 'yyyy-MM-dd')
+          const items = porDia.get(k) ?? []
+          const venc = items.some((a) => a.estado === 'VENCIDO')
+          const inMonth = isSameMonth(day, cursor)
+          const today = isSameDay(day, NOW)
+          return (
+            <div key={k} className={`cal-cell ${inMonth ? '' : 'muted-day'} ${today ? 'today' : ''} ${items.length ? 'has' : ''}`} onClick={() => items.length && onDay(day)}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="d">{format(day, 'd')}</span>
+                {items.length > 0 && <span className="cal-dot" style={{ width: 7, height: 7, borderRadius: '50%', background: venc ? 'var(--danger)' : 'var(--warn)' }} />}
+              </div>
+              {items.slice(0, 2).map((a, i) => (
+                <span key={i} className={`cal-pill ${a.estado === 'VENCIDO' ? 'v' : 'w'}`}>{a.tipo === 'Certificación' ? 'Cert' : 'MP'} · {a.equipo.split(' ')[0]}</span>
+              ))}
+              {items.length > 2 && <span className="faint" style={{ fontSize: 10 }}>+{items.length - 2} más</span>}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
 function Vencimientos({ clienteId }: { clienteId: number }) {
   const { cliente } = useStore()
   const alertas = useAlertas(clienteId)
   const [filtro, setFiltro] = useState<'Todos' | 'Certificación' | 'Mantenimiento'>('Todos')
+  const [view, setView] = useState<'lista' | 'calendario'>('lista')
+  const [dia, setDia] = useState<Date | null>(null)
 
   const rows = useMemo(() => alertas.filter((a) => filtro === 'Todos' || a.tipo === filtro), [alertas, filtro])
   const grupos = useMemo(() => {
@@ -31,12 +89,16 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
   const vencidos = alertas.filter((a) => a.estado === 'VENCIDO').length
   const cert = alertas.filter((a) => a.tipo === 'Certificación').length
   const mp = alertas.filter((a) => a.tipo === 'Mantenimiento').length
+  const delDia = dia ? rows.filter((a) => isSameDay(new Date(a.vencimientoISO), dia)) : []
 
   const download = () => exportCsv('vencimientos.csv', rows.map((a) => ({ Tipo: a.tipo, Equipo: a.equipo, Servicio: a.servicio, Vencimiento: fecha(a.vencimientoISO), Estado: a.estado })))
 
   return (
     <Page title="Vencimientos" sub={`${cliente?.nombre} · certificaciones y mantenimientos`}
-      actions={<button className="btn secondary" onClick={download} disabled={!rows.length}><Download size={16} /> Exportar</button>}>
+      actions={<>
+        <div className="seg"><button className={view === 'lista' ? 'on' : ''} onClick={() => setView('lista')}>Lista</button><button className={view === 'calendario' ? 'on' : ''} onClick={() => { setView('calendario'); setDia(null) }}>Calendario</button></div>
+        <button className="btn secondary" onClick={download} disabled={!rows.length}><Download size={16} /> Exportar</button>
+      </>}>
       <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
         <Kpi label="Total a atender" value={alertas.length} tone="warn" icon={<CalendarClock size={18} />} hint={`${vencidos} ya vencidos`} />
         <Kpi label="Certificaciones" value={cert} tone="info" icon={<ShieldCheck size={18} />} />
@@ -51,7 +113,26 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
         </div>
       </div>
 
-      {grupos.length === 0 ? <div className="card"><EmptyState icon={<ShieldCheck size={22} />}>Todo al día. Sin vencimientos próximos.</EmptyState></div> : grupos.map(([g, list]) => (
+      {view === 'calendario' ? (
+        <>
+          <Calendario alertas={rows} onDay={setDia} />
+          {dia && (
+            <div className="card">
+              <div className="card-head"><h3 style={{ textTransform: 'capitalize' }}>{format(dia, "EEEE d 'de' MMMM", { locale: es })}</h3><span className="badge">{delDia.length}</span></div>
+              <div className="tbl-wrap"><table className="tbl cards"><tbody>
+                {delDia.map((a, i) => (
+                  <tr key={i} style={{ cursor: 'default' }}>
+                    <td data-label="Tipo"><Badge tone={a.tipo === 'Certificación' ? 'info' : 'accent'}>{a.tipo}</Badge></td>
+                    <td data-label="Equipo" className="row-strong">{a.equipo}</td>
+                    <td data-label="Servicio">{a.servicio}</td>
+                    <td data-label="Estado"><Badge tone={a.estado === 'VENCIDO' ? 'danger' : 'warn'}>{a.estado === 'VENCIDO' ? 'Vencido' : 'Por vencer'}</Badge></td>
+                  </tr>
+                ))}
+              </tbody></table></div>
+            </div>
+          )}
+        </>
+      ) : grupos.length === 0 ? <div className="card"><EmptyState icon={<ShieldCheck size={22} />}>Todo al día. Sin vencimientos próximos.</EmptyState></div> : grupos.map(([g, list]) => (
         <div className="card" key={g}>
           <div className="card-head">
             <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -66,7 +147,7 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
                 {list.map((a, i) => {
                   const d = diasHasta(a.vencimientoISO) ?? 0
                   return (
-                    <tr key={i}>
+                    <tr key={i} style={{ cursor: 'default' }}>
                       <td data-label="Tipo"><Badge tone={a.tipo === 'Certificación' ? 'info' : 'accent'}>{a.tipo}</Badge></td>
                       <td data-label="Equipo" className="row-strong">{a.equipo}</td>
                       <td data-label="Servicio">{a.servicio}</td>
