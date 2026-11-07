@@ -257,14 +257,14 @@ export function buildSeed(): DB {
   ordenes.sort((a, b) => b.aperturaISO.localeCompare(a.aperturaISO))
 
   const usuarios: Usuario[] = [
-    { id: 1, username: 'admin', nombre: 'Emiliano', apellido: 'Miranda', email: 'admin@biotrust.com.ar', rol: 'ADMIN', clienteIds: [], color: '#0e7490' },
+    { id: 1, username: 'emiranda', nombre: 'Emmanuel', apellido: 'Miranda', email: 'emiranda@biotrust.com.ar', rol: 'ADMIN', clienteIds: [], color: '#0b7a90' },
     { id: 2, username: 'gestion', nombre: 'Eliana', apellido: 'Reniero', email: 'gestion@biotrust.com.ar', rol: 'GESTION', clienteIds: [], color: '#4f46e5' },
     { id: 3, username: 'tecnico', nombre: 'Pablo', apellido: 'Quiroga', email: 'tecnico@biotrust.com.ar', rol: 'TECNICO', clienteIds: [], color: '#0891b2' },
     { id: 4, username: 'cliente', nombre: 'Lucía', apellido: 'Gómez', email: 'ing.clinica@galeno.com', rol: 'CLIENTE', clienteIds: [1], color: '#0d9488' },
   ]
 
   return {
-    version: 3,
+    version: 4,
     usuarios,
     clientes,
     servicios,

@@ -4,8 +4,8 @@ import { Boxes, ShieldCheck, Smartphone, QrCode, Bell } from 'lucide-react'
 import { useStore, ROLE_LABEL } from '../lib/store'
 import type { Role } from '../lib/types'
 
-const DEMO: { username: string; rol: Role; desc: string }[] = [
-  { username: 'admin', rol: 'ADMIN', desc: 'Acceso total' },
+const DEMO: { username: string; rol: Role; desc: string; label?: string }[] = [
+  { username: 'emiranda', rol: 'ADMIN', desc: 'Acceso total', label: 'Emmanuel Miranda' },
   { username: 'gestion', rol: 'GESTION', desc: 'Gestión y certificaciones' },
   { username: 'tecnico', rol: 'TECNICO', desc: 'Operación en campo' },
   { username: 'cliente', rol: 'CLIENTE', desc: 'Portal del cliente' },
@@ -70,8 +70,8 @@ export default function Login() {
                   {d.username[0].toUpperCase()}
                 </span>
                 <div style={{ flex: 1 }}>
-                  <b style={{ textTransform: 'capitalize' }}>{ROLE_LABEL[d.rol]}</b>
-                  <div className="faint small">{d.desc}</div>
+                  <b style={{ textTransform: 'capitalize' }}>{d.label ?? ROLE_LABEL[d.rol]}</b>
+                  <div className="faint small">{d.label ? `${ROLE_LABEL[d.rol]} · ${d.desc}` : d.desc}</div>
                 </div>
                 <span className="faint small mono">{d.username}</span>
               </button>

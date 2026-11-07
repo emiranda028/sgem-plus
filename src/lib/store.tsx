@@ -3,7 +3,7 @@ import type { DB, OrdenServicio, Equipo, Usuario, Cliente } from './types'
 import { buildSeed } from './seed'
 import { vigencia } from './format'
 
-const DB_KEY = 'sgem.plus.db.v3'
+const DB_KEY = 'sgem.plus.db.v4'
 const SESSION_KEY = 'sgem.plus.user'
 const CLIENT_KEY = 'sgem.plus.cliente'
 
@@ -12,7 +12,7 @@ function loadDB(): DB {
     const raw = localStorage.getItem(DB_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as DB
-      if (parsed.version === 3) return parsed
+      if (parsed.version === 4) return parsed
     }
   } catch { /* ignore */ }
   const seed = buildSeed()
