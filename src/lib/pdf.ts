@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf'
 import QRCode from 'qrcode'
-import type { Cliente, Equipo, OrdenServicio } from './types'
+import type { Cliente, Equipo, OrdenServicio, Protocolo } from './types'
 import { fechaLarga } from './format'
 
 const BRAND: [number, number, number] = [14, 116, 144]
@@ -109,6 +109,57 @@ export async function remitoPDF(o: OrdenServicio, equipo: Equipo | null, cliente
     footer(doc)
   }
   doc.save(`Remito_${o.numero}.pdf`)
+}
+
+/** La fuente estándar de jsPDF (WinAnsi) no tiene ≤, Ω, ±, subíndices: los pasamos a ASCII. */
+function ascii(s: string) {
+  return s
+    .replace(/≤/g, '<=').replace(/≥/g, '>=').replace(/±/g, '+/-')
+    .replace(/Ω/g, ' ohm').replace(/µ/g, 'u').replace(/°/g, 'deg')
+    .replace(/₂/g, '2').replace(/₃/g, '3').replace(/²/g, '2').replace(/³/g, '3')
+}
+
+export async function informeEnsayoPDF(o: OrdenServicio, equipo: Equipo | null, cliente: Cliente, pr: Protocolo) {
+  const doc = new jsPDF()
+  header(doc, 'INFORME DE ENSAYO', o.numero)
+  let y = 44
+  doc.setTextColor(...INK); doc.setFont('helvetica', 'bold'); doc.setFontSize(13)
+  doc.text(pr.tipo, 16, y); y += 6
+  doc.setTextColor(...SOFT); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5)
+  doc.text(pr.norma, 16, y); y += 12
+  kv(doc, 16, y, 'Cliente', cliente.nombre); kv(doc, 110, y, 'Fecha', fechaLarga(pr.fechaISO)); y += 16
+  if (equipo) { kv(doc, 16, y, 'Equipo', `${equipo.tipo} · ${equipo.fabricante} ${equipo.modelo}`); kv(doc, 110, y, 'N° de serie', equipo.serie); y += 16 }
+
+  // Tabla de ensayos
+  const x0 = 16, w = 178
+  doc.setFillColor(11, 122, 144); doc.rect(x0, y, w, 8, 'F')
+  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(8)
+  doc.text('ENSAYO', x0 + 3, y + 5.5); doc.text('LÍMITE', x0 + 95, y + 5.5); doc.text('MEDIDO', x0 + 130, y + 5.5); doc.text('RESULTADO', x0 + 155, y + 5.5)
+  y += 8
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5)
+  for (const it of pr.items) {
+    doc.setDrawColor(224, 231, 233); doc.line(x0, y + 7, x0 + w, y + 7)
+    doc.setTextColor(...INK); doc.text(doc.splitTextToSize(ascii(it.label), 88), x0 + 3, y + 5)
+    doc.setTextColor(...SOFT); doc.text(ascii(it.limite), x0 + 95, y + 5)
+    doc.setTextColor(...INK); doc.text(ascii(it.valor || '—'), x0 + 130, y + 5)
+    const okCol: [number, number, number] = it.ok === true ? [16, 137, 62] : it.ok === false ? [210, 59, 50] : [120, 140, 148]
+    doc.setTextColor(...okCol); doc.setFont('helvetica', 'bold')
+    doc.text(it.ok === true ? 'APTO' : it.ok === false ? 'NO APTO' : 'N/A', x0 + 155, y + 5)
+    doc.setFont('helvetica', 'normal')
+    y += 7.5
+  }
+  y += 8
+  const rc: [number, number, number] = pr.resultado === 'APTO' ? [16, 137, 62] : pr.resultado === 'NO APTO' ? [210, 59, 50] : [191, 116, 8]
+  doc.setFillColor(rc[0], rc[1], rc[2]); doc.roundedRect(x0, y, 60, 14, 2, 2, 'F')
+  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(11)
+  doc.text(`RESULTADO: ${pr.resultado}`, x0 + 6, y + 9)
+
+  doc.setTextColor(...SOFT); doc.setFont('helvetica', 'normal'); doc.setFontSize(8)
+  doc.text(`Realizado por: ${pr.realizadoPor}`, 110, y + 6)
+  doc.setDrawColor(207, 217, 220); doc.line(110, y + 28, 184, y + 28)
+  doc.text('Firma del responsable técnico', 110, y + 33)
+  footer(doc)
+  doc.save(`Informe_ensayo_${o.numero}.pdf`)
 }
 
 export async function etiquetasPDF(equipos: Equipo[], clienteNombre: string) {

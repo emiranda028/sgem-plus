@@ -1,7 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import {
   Boxes, ClipboardList, LayoutDashboard, LogOut, Moon, Settings2, Stethoscope,
-  Sun, Wrench, CalendarClock, Building2, ScrollText, QrCode,
+  Sun, Wrench, CalendarClock, Building2, ScrollText, QrCode, Bell,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import ClientPicker from './ClientPicker'
@@ -44,6 +44,7 @@ export default function Layout() {
           label: 'Gestión',
           items: [
             { to: '/vencimientos', label: 'Vencimientos', icon: CalendarClock, count: alertas.length, danger: alertas.filter((a) => a.estado === 'VENCIDO').length > 0 },
+            { to: '/notificaciones', label: 'Notificaciones', icon: Bell },
             { to: '/portal', label: 'Portal del cliente', icon: Building2 },
             { to: '/auditoria', label: 'Auditoría', icon: ScrollText },
             { to: '/configuracion', label: 'Configuración', icon: Settings2 },

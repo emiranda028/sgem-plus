@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useRef } from 'react'
-import { Camera, Download, FileSignature, Plus, Search, Trash2, X } from 'lucide-react'
+import { Camera, ClipboardCheck, Download, FileSignature, Plus, Search, Trash2, X } from 'lucide-react'
+import { plantillaProtocolo } from '../lib/protocolos'
+import { informeEnsayoPDF } from '../lib/pdf'
+import type { Protocolo } from '../lib/types'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { Badge, EmptyState } from '../components/ui'
@@ -145,6 +148,26 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
   }
   const quitarFoto = (i: number) => updateOrden(orden.id, { fotosData: fotos.filter((_, j) => j !== i) })
 
+  const [protoAbierto, setProtoAbierto] = useState(false)
+  const [proto, setProto] = useState<Protocolo | null>(orden.protocolo ?? null)
+  const iniciarProto = () => {
+    const t = plantillaProtocolo(equipo)
+    setProto({ tipo: 'Protocolo de ensayo', norma: t.norma, items: t.items, realizadoPor: orden.tecnico, fechaISO: new Date().toISOString(), resultado: 'OBSERVADO' })
+    setProtoAbierto(true)
+  }
+  const setItem = (i: number, patch: Partial<Protocolo['items'][number]>) => {
+    setProto((p) => p ? { ...p, items: p.items.map((it, j) => j === i ? { ...it, ...patch } : it) } : p)
+  }
+  const guardarProto = () => {
+    if (!proto) return
+    const faltan = proto.items.some((it) => it.ok === null)
+    const resultado = proto.items.some((it) => it.ok === false) ? 'NO APTO' : faltan ? 'OBSERVADO' : 'APTO'
+    const fin = { ...proto, resultado: resultado as Protocolo['resultado'] }
+    updateOrden(orden.id, { protocolo: fin })
+    addAccion(orden.id, `Protocolo de ensayo completado · resultado ${resultado}.`)
+    setProto(fin); setProtoAbierto(false)
+  }
+
   return (
     <>
       <div className="scrim" onClick={onClose} />
@@ -158,6 +181,7 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
             <Badge tone={situTone(orden.situacion)}>{orden.situacion}</Badge>
             <Badge tone={orden.criticidad === 'ALTA' ? 'danger' : orden.criticidad === 'MEDIA' ? 'warn' : 'neutral'}>{orden.criticidad}</Badge>
             <Badge>{orden.tipo}</Badge>
+            {orden.origen === 'Portal' && <Badge tone="accent">Solicitud del cliente</Badge>}
           </div>
 
           {puedeEditar && (
@@ -187,6 +211,52 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <input className="search" style={{ flex: 1 }} placeholder="Agregar una acción…" value={nota} onChange={(e) => setNota(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && nota.trim()) { addAccion(orden.id, nota.trim()); setNota('') } }} />
                 <button className="btn secondary" disabled={!nota.trim()} onClick={() => { addAccion(orden.id, nota.trim()); setNota('') }}>Agregar</button>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <b style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 7 }}><ClipboardCheck size={15} style={{ color: 'var(--brand)' }} /> Protocolo de ensayo</b>
+              {proto && !protoAbierto && <Badge tone={proto.resultado === 'APTO' ? 'ok' : proto.resultado === 'NO APTO' ? 'danger' : 'warn'}>{proto.resultado}</Badge>}
+            </div>
+            {!proto && !protoAbierto && (
+              puedeEditar ? <button className="btn secondary sm" onClick={iniciarProto}><ClipboardCheck size={15} /> Iniciar protocolo</button>
+                : <span className="faint small">Sin protocolo cargado.</span>
+            )}
+            {proto && !protoAbierto && (
+              <div className="card pad" style={{ display: 'grid', gap: 8 }}>
+                <div className="faint small">{proto.norma} · {proto.realizadoPor}</div>
+                {proto.items.map((it, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 12.5, paddingBottom: 6, borderBottom: '1px solid var(--border)' }}>
+                    <span style={{ flex: 1 }}>{it.label}</span>
+                    <span className="faint mono">{it.valor || '—'}</span>
+                    <Badge tone={it.ok ? 'ok' : it.ok === false ? 'danger' : 'neutral'}>{it.ok ? 'Apto' : it.ok === false ? 'No apto' : 'N/A'}</Badge>
+                  </div>
+                ))}
+                <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                  {puedeEditar && <button className="btn ghost sm" onClick={() => setProtoAbierto(true)}>Editar</button>}
+                  <button className="btn secondary sm" onClick={() => informeEnsayoPDF(orden, equipo, cliente, proto)}><Download size={14} /> Informe de ensayo PDF</button>
+                </div>
+              </div>
+            )}
+            {proto && protoAbierto && (
+              <div className="card pad" style={{ display: 'grid', gap: 10 }}>
+                <div className="faint small">{proto.norma}</div>
+                {proto.items.map((it, i) => (
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 86px auto', gap: 8, alignItems: 'center' }}>
+                    <div><div style={{ fontSize: 12.5, fontWeight: 500 }}>{it.label}</div><div className="faint" style={{ fontSize: 11 }}>Límite {it.limite}</div></div>
+                    <input className="search" style={{ height: 32, padding: '0 8px' }} placeholder="Medido" value={it.valor} onChange={(e) => setItem(i, { valor: e.target.value })} />
+                    <div className="seg">
+                      <button className={it.ok === true ? 'on' : ''} onClick={() => setItem(i, { ok: true })} title="Apto">✓</button>
+                      <button className={it.ok === false ? 'on' : ''} onClick={() => setItem(i, { ok: false })} title="No apto">✕</button>
+                    </div>
+                  </div>
+                ))}
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button className="btn ghost sm" onClick={() => setProtoAbierto(false)}>Cancelar</button>
+                  <button className="btn primary sm" onClick={guardarProto}>Guardar protocolo</button>
+                </div>
               </div>
             )}
           </div>

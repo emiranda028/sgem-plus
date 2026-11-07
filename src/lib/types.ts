@@ -106,6 +106,24 @@ export interface OrdenServicio {
   fotosData?: string[]
   firmaDataUrl?: string
   firmante?: string
+  origen?: 'Interna' | 'Portal'
+  protocolo?: Protocolo
+}
+
+export interface ProtocoloItem {
+  label: string
+  limite: string
+  valor: string
+  ok: boolean | null
+}
+
+export interface Protocolo {
+  tipo: string
+  norma: string
+  items: ProtocoloItem[]
+  realizadoPor: string
+  fechaISO: string
+  resultado: 'APTO' | 'NO APTO' | 'OBSERVADO'
 }
 
 export interface AuditLog {
