@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Printer, QrCode, Check } from 'lucide-react'
+import { Check, Download, Printer, QrCode } from 'lucide-react'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { EmptyState } from '../components/ui'
 import { Qr } from '../components/Qr'
 import { useStore } from '../lib/store'
+import { etiquetasPDF } from '../lib/pdf'
 
 function Etiquetas({ clienteId }: { clienteId: number }) {
   const { db, cliente } = useStore()
@@ -32,6 +33,7 @@ function Etiquetas({ clienteId }: { clienteId: number }) {
             <option value="">Todos los servicios</option>
             {servicios.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}
           </select>
+          <button className="btn secondary" onClick={() => etiquetasPDF(aImprimir, cliente?.nombre ?? '')} disabled={!aImprimir.length}><Download size={16} /> PDF</button>
           <button className="btn primary" onClick={() => window.print()} disabled={!aImprimir.length}><Printer size={16} /> Imprimir ({aImprimir.length})</button>
         </div>
       }>

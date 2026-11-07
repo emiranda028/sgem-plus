@@ -89,7 +89,67 @@ export async function remitoPDF(o: OrdenServicio, equipo: Equipo | null, cliente
   doc.setTextColor(...SOFT); doc.setFontSize(8)
   doc.text(`Conforme · ${o.firmante || 'Recepción del cliente'}`, 120, 263)
   footer(doc)
+
+  // Anexo fotográfico
+  const fotos = (o.fotosData ?? []).filter((f) => f.startsWith('data:'))
+  if (fotos.length) {
+    doc.addPage()
+    header(doc, 'ANEXO FOTOGRÁFICO', o.numero)
+    doc.setTextColor(...INK); doc.setFont('helvetica', 'bold'); doc.setFontSize(12)
+    doc.text('Registro fotográfico del servicio', 16, 44)
+    const cols = 2, w = 86, h = 64, gapX = 6, gapY = 8, x0 = 16, y0 = 52
+    fotos.slice(0, 8).forEach((src, i) => {
+      const col = i % cols, row = Math.floor(i / cols)
+      const x = x0 + col * (w + gapX), y = y0 + row * (h + gapY)
+      try {
+        doc.setDrawColor(224, 231, 233); doc.roundedRect(x, y, w, h, 2, 2, 'S')
+        doc.addImage(src, 'JPEG', x + 1, y + 1, w - 2, h - 2)
+      } catch { /* ignore */ }
+    })
+    footer(doc)
+  }
   doc.save(`Remito_${o.numero}.pdf`)
+}
+
+export async function etiquetasPDF(equipos: Equipo[], clienteNombre: string) {
+  const doc = new jsPDF()
+  // precalcular QRs
+  const qrs = new Map<number, string>()
+  for (const e of equipos) qrs.set(e.id, await qrDataUrl(e.qr))
+
+  const cols = 3, rows = 7
+  const mX = 8, mTop = 26
+  const lw = (210 - mX * 2) / cols // ancho etiqueta
+  const lh = (297 - mTop - 8) / rows // alto etiqueta
+  const perPage = cols * rows
+
+  equipos.forEach((e, i) => {
+    const idx = i % perPage
+    if (i > 0 && idx === 0) doc.addPage()
+    if (idx === 0) {
+      doc.setFillColor(...BRAND); doc.rect(0, 0, 210, 18, 'F')
+      doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(11)
+      doc.text('SGEM · Etiquetas de equipamiento', 8, 11)
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(8)
+      doc.text(clienteNombre, 202, 11, { align: 'right' })
+    }
+    const col = idx % cols, row = Math.floor(idx / cols)
+    const x = mX + col * lw, y = mTop + row * lh
+    doc.setDrawColor(224, 231, 233); doc.roundedRect(x + 1, y + 1, lw - 2, lh - 2, 2, 2, 'S')
+    const qr = qrs.get(e.id)
+    const qs = Math.min(lh - 8, 26)
+    if (qr) doc.addImage(qr, 'PNG', x + 4, y + (lh - qs) / 2, qs, qs)
+    const tx = x + qs + 7
+    const tw = lw - qs - 11
+    doc.setTextColor(...INK); doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5)
+    doc.text(doc.splitTextToSize(e.tipo, tw), tx, y + 8)
+    doc.setTextColor(...SOFT); doc.setFont('helvetica', 'normal'); doc.setFontSize(7)
+    doc.text(doc.splitTextToSize(`${e.fabricante} ${e.modelo}`, tw), tx, y + 13)
+    doc.text(`S/N ${e.serie}`, tx, y + 18)
+    doc.setTextColor(...BRAND); doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5)
+    doc.text(e.qr, tx, y + lh - 6)
+  })
+  doc.save(`Etiquetas_${clienteNombre.replace(/\s+/g, '_')}.pdf`)
 }
 
 export async function certificadoPDF(equipo: Equipo, cliente: Cliente, numero: string, vencISO: string) {
