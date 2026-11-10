@@ -362,8 +362,8 @@ table.tbl { width: 100%; border-collapse: collapse; }
 
 /* Tarjetas de lista (mobile y también usables en desktop) */
 .mcards { display: grid; gap: 12px; }
-.mcard { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 13px 14px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; text-align: left; width: 100%; transition: transform .1s, box-shadow .15s, border-color .15s; }
-.mcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--acc, var(--brand)); }
+.mcard { display: grid; grid-template-columns: auto 1fr auto; gap: 13px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 13px 15px; box-shadow: var(--shadow-sm); position: relative; overflow: visible; text-align: left; width: 100%; transition: transform .1s, box-shadow .15s, border-color .15s; }
+.mcard::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 0 3px 3px 0; background: var(--acc, var(--brand)); }
 .mcard:hover { box-shadow: var(--shadow); border-color: var(--border-strong); }
 .mcard:active { transform: scale(.985); }
 .mcard .mc-body { min-width: 0; }
@@ -457,5 +457,10 @@ table.tbl { width: 100%; border-collapse: collapse; }
   .only-desktop { display: none !important; }
   .topbar { gap: 8px; }
   .topbar > div:last-child { flex: none; }
-  .cpick-trigger { gap: 7px; padding: 0 10px; }
+  /* Liberar espacio: dejar solo el logo (sin el texto "SGEM") para que entre
+     más del nombre del cliente en el selector. */
+  .brand-mobile .bm-name { display: none; }
+  /* Permitir que el nombre del cliente se lea completo (hasta 2 líneas). */
+  .cpick-trigger { gap: 8px; padding: 5px 10px; height: auto; min-height: 42px; align-items: center; }
+  .cpick-trigger .nm { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.14; font-size: 12.5px; }
 }

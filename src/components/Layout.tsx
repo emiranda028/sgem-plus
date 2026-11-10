@@ -90,7 +90,7 @@ export default function Layout() {
 
       <div className="main">
         <header className="topbar">
-          <div className="brand-mobile"><span className="mark"><Boxes size={18} /></span> SGEM</div>
+          <div className="brand-mobile"><span className="mark"><Boxes size={18} /></span> <span className="bm-name">SGEM</span></div>
           {!esCliente && <ClientPicker />}
           {esCliente && cliente && (
             <span className="chip on"><Building2 size={15} /> {cliente.nombre}</span>
