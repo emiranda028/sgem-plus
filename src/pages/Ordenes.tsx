@@ -98,9 +98,9 @@ function Ordenes({ clienteId }: { clienteId: number }) {
                 {rows.map((o) => {
                   const dias = o.situacion !== 'Cerrada' ? diasDesde(o.aperturaISO) : null
                   return (
-                    <tr key={o.id} onClick={() => setSel(o)}>
+                    <tr key={o.id} className={selection.has(o.id) ? 'selected' : ''} onClick={() => (selection.on ? selection.toggle(o.id) : setSel(o))}>
                       <td><span className="mono small">{o.numero}</span><div className="faint small">{fecha(o.aperturaISO)}</div></td>
-                      <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><IconTile icon={iconOS(o.tipo)} tone={situTone(o.situacion)} size={34} /><div><div className="row-strong">{clean(o.titulo)}</div><div className="faint small">{clean(o.descripcion)}</div></div></div></td>
+                      <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>{selection.on ? <SelectBox checked={selection.has(o.id)} /> : <IconTile icon={iconOS(o.tipo)} tone={situTone(o.situacion)} size={34} />}<div><div className="row-strong">{clean(o.titulo)}</div><div className="faint small">{clean(o.descripcion)}</div></div></div></td>
                       <td>{o.tipo}</td>
                       <td><Badge tone={situTone(o.situacion)}>{o.situacion}</Badge></td>
                       <td>{o.taller}</td>
