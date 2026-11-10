@@ -5,9 +5,10 @@ import { es } from 'date-fns/locale'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { Badge, EmptyState, Kpi } from '../components/ui'
+import { SelectBox, SelectToggle, SelectionBar, useSelection } from '../components/Selection'
 import { useAlertas, useStore, type Alerta } from '../lib/store'
 import { NOW, diasHasta, fecha } from '../lib/format'
-import { exportCsv } from '../lib/csv'
+import { exportCsv, shareSelectionImage } from '../lib/share'
 
 function grupo(a: Alerta): string {
   const d = diasHasta(a.vencimientoISO) ?? 0
@@ -80,6 +81,8 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
   const [filtro, setFiltro] = useState<'Todos' | 'Certificación' | 'Mantenimiento'>('Todos')
   const [view, setView] = useState<'lista' | 'calendario'>('lista')
   const [dia, setDia] = useState<Date | null>(null)
+  const selection = useSelection()
+  const aid = (a: Alerta) => a.equipoId * 2 + (a.tipo === 'Certificación' ? 0 : 1)
 
   const rows = useMemo(() => alertas.filter((a) => filtro === 'Todos' || a.tipo === filtro), [alertas, filtro])
   const grupos = useMemo(() => {
@@ -99,6 +102,7 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
     <Page title="Vencimientos" sub={`${cliente?.nombre} · certificaciones y mantenimientos`}
       actions={<>
         <div className="seg"><button className={view === 'lista' ? 'on' : ''} onClick={() => setView('lista')}>Lista</button><button className={view === 'calendario' ? 'on' : ''} onClick={() => { setView('calendario'); setDia(null) }}>Calendario</button></div>
+        {view === 'lista' && <SelectToggle on={selection.on} onToggle={() => (selection.on ? selection.exit() : selection.setOn(true))} />}
         <button className="btn secondary" onClick={download} disabled={!rows.length}><Download size={16} /> Exportar</button>
         {user?.rol !== 'CLIENTE' && <button className="btn primary" onClick={generar}><Zap size={16} /> Generar órdenes</button>}
       </>}>
@@ -156,8 +160,8 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
                 {list.map((a, i) => {
                   const d = diasHasta(a.vencimientoISO) ?? 0
                   return (
-                    <tr key={i} style={{ cursor: 'default' }}>
-                      <td data-label="Tipo"><Badge tone={a.tipo === 'Certificación' ? 'info' : 'accent'}>{a.tipo}</Badge></td>
+                    <tr key={i} className={`${selection.on ? 'selectable' : ''} ${selection.has(aid(a)) ? 'selected' : ''}`} onClick={selection.on ? () => selection.toggle(aid(a)) : undefined} style={selection.on ? undefined : { cursor: 'default' }}>
+                      <td data-label="Tipo"><div className="sel-head">{selection.on && <SelectBox checked={selection.has(aid(a))} />}<Badge tone={a.tipo === 'Certificación' ? 'info' : 'accent'}>{a.tipo}</Badge></div></td>
                       <td data-label="Equipo" className="row-strong">{a.equipo}</td>
                       <td data-label="Servicio">{a.servicio}</td>
                       <td data-label="Vence" className="mono small">{fecha(a.vencimientoISO)}</td>
@@ -170,6 +174,14 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
           </div>
         </div>
       ))}
+      {view === 'lista' && selection.on && (
+        <SelectionBar count={selection.size} total={rows.length}
+          onAll={() => selection.selectMany(rows.map(aid))}
+          onClear={selection.clear}
+          onCsv={() => exportCsv('vencimientos-seleccion.csv', rows.filter((a) => selection.has(aid(a))).map((a) => ({ Tipo: a.tipo, Equipo: a.equipo, Servicio: a.servicio, Vencimiento: fecha(a.vencimientoISO), Estado: a.estado })))}
+          onImg={() => shareSelectionImage({ title: 'Vencimientos', subtitle: cliente?.nombre, filename: 'vencimientos-sgem.png', items: rows.filter((a) => selection.has(aid(a))).map((a) => ({ titulo: a.equipo, lineas: [`${a.tipo} · ${a.servicio}`, `Vence ${fecha(a.vencimientoISO)}`, a.estado === 'VENCIDO' ? 'VENCIDO' : 'Por vencer'] })) })}
+        />
+      )}
     </Page>
   )
 }

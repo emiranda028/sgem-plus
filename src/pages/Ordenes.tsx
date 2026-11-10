@@ -7,6 +7,8 @@ import type { EstadoTarea, Protocolo } from '../lib/types'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { Badge, EmptyState, IconTile, iconOS, useIsMobile } from '../components/ui'
+import { SelectBox, SelectToggle, SelectionBar, useSelection } from '../components/Selection'
+import { exportCsv, shareSelectionImage } from '../lib/share'
 import Signature from '../components/Signature'
 import { useStore } from '../lib/store'
 import { clean, diasDesde, diasHasta, fecha, normalize } from '../lib/format'
@@ -33,6 +35,7 @@ function Ordenes({ clienteId }: { clienteId: number }) {
   const [nueva, setNueva] = useState(false)
   const puedeEditar = user?.rol !== 'CLIENTE'
   const isMobile = useIsMobile()
+  const selection = useSelection()
 
   const todas = useMemo(() => db.ordenes.filter((o) => o.clienteId === clienteId), [db.ordenes, clienteId])
   const abiertas = todas.filter((o) => o.situacion !== 'Cerrada').length
@@ -51,6 +54,7 @@ function Ordenes({ clienteId }: { clienteId: number }) {
     <Page title="Órdenes de servicio" sub={`${abiertas} abiertas · ${todas.length} en total · ${cliente?.nombre}`}
       actions={<>
         <div className="seg"><button className={view === 'lista' ? 'on' : ''} onClick={() => setView('lista')}>Lista</button><button className={view === 'tablero' ? 'on' : ''} onClick={() => setView('tablero')}>Tablero</button></div>
+        <SelectToggle on={selection.on} onToggle={() => (selection.on ? selection.exit() : selection.setOn(true))} />
         {puedeEditar && <button className="btn primary" onClick={() => setNueva(true)}><Plus size={16} /> Nueva OS</button>}
       </>}>
       <div className="card pad">
@@ -67,8 +71,8 @@ function Ordenes({ clienteId }: { clienteId: number }) {
             const dias = o.situacion !== 'Cerrada' ? diasDesde(o.aperturaISO) : null
             const tone = situTone(o.situacion)
             return (
-              <button key={o.id} className={`mcard acc-${tone}`} onClick={() => setSel(o)}>
-                <IconTile icon={iconOS(o.tipo)} tone={tone} size={42} />
+              <button key={o.id} className={`mcard acc-${tone} ${selection.has(o.id) ? 'selected' : ''}`} onClick={() => (selection.on ? selection.toggle(o.id) : setSel(o))}>
+                {selection.on ? <SelectBox checked={selection.has(o.id)} /> : <IconTile icon={iconOS(o.tipo)} tone={tone} size={42} />}
                 <div className="mc-body">
                   <div className="mc-title">{clean(o.titulo)}</div>
                   <div className="mc-sub">{o.numero} · {o.taller}</div>
@@ -134,6 +138,15 @@ function Ordenes({ clienteId }: { clienteId: number }) {
             )
           })}
         </div>
+      )}
+
+      {selection.on && (
+        <SelectionBar count={selection.size} total={rows.length}
+          onAll={() => selection.selectMany(rows.map((o) => o.id))}
+          onClear={selection.clear}
+          onCsv={() => exportCsv('ordenes-seleccion.csv', rows.filter((o) => selection.has(o.id)).map((o) => ({ OS: o.numero, Titulo: clean(o.titulo), Tipo: o.tipo, Situacion: o.situacion, Taller: o.taller, Tecnico: o.tecnico, Apertura: fecha(o.aperturaISO) })))}
+          onImg={() => shareSelectionImage({ title: 'Órdenes de servicio', subtitle: cliente?.nombre, filename: 'ordenes-sgem.png', items: rows.filter((o) => selection.has(o.id)).map((o) => ({ titulo: clean(o.titulo), lineas: [`${o.numero} · ${o.situacion}`, `${o.taller} · ${o.tecnico}`, `Apertura ${fecha(o.aperturaISO)}`] })) })}
+        />
       )}
 
       {current && <Detalle orden={current} onClose={() => setSel(null)} puedeEditar={puedeEditar} />}

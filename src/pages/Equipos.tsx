@@ -4,9 +4,10 @@ import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { Badge, EmptyState, EstadoBadge, IconTile, VigBadge, iconEquipo, useIsMobile } from '../components/ui'
 import { Qr } from '../components/Qr'
+import { SelectBox, SelectToggle, SelectionBar, useSelection } from '../components/Selection'
 import { useStore } from '../lib/store'
 import { certificadoPDF } from '../lib/pdf'
-import { exportCsv } from '../lib/csv'
+import { exportCsv, shareSelectionImage } from '../lib/share'
 import { clean, fecha, normalize, vigencia } from '../lib/format'
 import type { Equipo } from '../lib/types'
 
@@ -21,6 +22,7 @@ function Lista({ clienteId, readOnly }: { clienteId: number; readOnly?: boolean 
   const [estado, setEstado] = useState('')
   const [limit, setLimit] = useState(PAGE)
   const [sel, setSel] = useState<Equipo | null>(null)
+  const selection = useSelection()
 
   const equipos = useMemo(() => db.equipos.filter((e) => e.clienteId === clienteId), [db.equipos, clienteId])
   const servicios = useMemo(() => new Map(db.servicios.map((s) => [s.id, s.nombre])), [db.servicios])
@@ -57,7 +59,10 @@ function Lista({ clienteId, readOnly }: { clienteId: number; readOnly?: boolean 
 
   return (
     <Page title="Equipos" sub={`${rows.length} de ${equipos.length} equipos · ${cliente?.nombre}`}
-      actions={<button className="btn secondary" onClick={download} disabled={!rows.length}><Download size={16} /> Exportar</button>}>
+      actions={<>
+        <SelectToggle on={selection.on} onToggle={() => (selection.on ? selection.exit() : selection.setOn(true))} />
+        <button className="btn secondary" onClick={download} disabled={!rows.length}><Download size={16} /> Exportar</button>
+      </>}>
       <div className="card pad">
         <div className="filters" style={{ marginBottom: 14 }}>
           <label className="search" style={{ flex: '1 1 260px' }}>
@@ -76,8 +81,8 @@ function Lista({ clienteId, readOnly }: { clienteId: number; readOnly?: boolean 
                 const estadoTone = e.estado === 'OPERATIVO' ? 'ok' : e.estado === 'EN TALLER' ? 'warn' : e.estado === 'FUERA DE SERVICIO' ? 'danger' : 'neutral'
                 const cv = c ? vigencia(c.vencimientoISO) : null
                 return (
-                  <button key={e.id} className={`mcard acc-${estadoTone}`} onClick={() => setSel(e)}>
-                    <IconTile icon={iconEquipo(e.tipo)} tone={estadoTone} size={42} />
+                  <button key={e.id} className={`mcard acc-${estadoTone} ${selection.has(e.id) ? 'selected' : ''}`} onClick={() => (selection.on ? selection.toggle(e.id) : setSel(e))}>
+                    {selection.on ? <SelectBox checked={selection.has(e.id)} /> : <IconTile icon={iconEquipo(e.tipo)} tone={estadoTone} size={42} />}
                     <div className="mc-body">
                       <div className="mc-title">{e.tipo}</div>
                       <div className="mc-sub">{e.fabricante} {e.modelo} · {servicios.get(e.servicioId)}</div>
@@ -122,6 +127,14 @@ function Lista({ clienteId, readOnly }: { clienteId: number; readOnly?: boolean 
           </>
         )}
       </div>
+      {selection.on && (
+        <SelectionBar count={selection.size} total={rows.length}
+          onAll={() => selection.selectMany(rows.map((e) => e.id))}
+          onClear={selection.clear}
+          onCsv={() => exportCsv('equipos-seleccion.csv', rows.filter((e) => selection.has(e.id)).map((e) => ({ QR: e.qr, Tipo: e.tipo, Fabricante: e.fabricante, Modelo: e.modelo, Serie: e.serie, Servicio: servicios.get(e.servicioId), Estado: e.estado, Pertenencia: e.pertenencia, Certificacion: fecha(certOf(e.id)?.vencimientoISO), Preventivo: fecha(mpOf(e.id)?.proximoISO) })))}
+          onImg={() => shareSelectionImage({ title: 'Equipos', subtitle: cliente?.nombre, filename: 'equipos-sgem.png', items: rows.filter((e) => selection.has(e.id)).map((e) => ({ titulo: e.tipo, lineas: [`${e.fabricante} ${e.modelo} · S/N ${e.serie}`, `${servicios.get(e.servicioId) ?? ''} · ${e.estado}`, e.qr] })) })}
+        />
+      )}
       {sel && <Ficha equipo={sel} onClose={() => setSel(null)} readOnly={readOnly} />}
     </Page>
   )
