@@ -10,6 +10,12 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       VitePWA({
+        // Caché offline desactivada temporalmente: durante la etapa de demo,
+        // el service worker dejaba a los dispositivos clavados en versiones
+        // viejas. Con selfDestroying el SW existente se desregistra solo y
+        // limpia su caché, de modo que la app siempre carga la última versión
+        // desde la red. Reactivar (quitar esta línea) cuando se estabilice.
+        selfDestroying: true,
         registerType: 'autoUpdate',
         includeAssets: ['icons/favicon.svg'],
         manifest: {
