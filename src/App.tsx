@@ -26,6 +26,13 @@ function Guard({ children }: { children: ReactNode }) {
   return <>{children}</>
 }
 
+/** Rutas internas: el rol CLIENTE queda fuera y se lo manda a su portal. */
+function Staff({ children }: { children: ReactNode }) {
+  const { user } = useStore()
+  if (user?.rol === 'CLIENTE') return <Navigate to="/portal" replace />
+  return <Suspense fallback={<Load />}>{children}</Suspense>
+}
+
 export default function App() {
   useTheme() // aplica el atributo data-theme
   const { user } = useStore()
@@ -38,17 +45,17 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route element={<Guard><Layout /></Guard>}>
         <Route index element={user?.rol === 'CLIENTE' ? <Navigate to="/portal" replace /> : <Suspense fallback={<Load />}><Tablero /></Suspense>} />
-        <Route path="ordenes" element={<Suspense fallback={<Load />}><Ordenes /></Suspense>} />
+        <Route path="ordenes" element={<Staff><Ordenes /></Staff>} />
         <Route path="equipos" element={<Suspense fallback={<Load />}><Equipos /></Suspense>} />
-        <Route path="taller" element={<Suspense fallback={<Load />}><Taller /></Suspense>} />
-        <Route path="agenda" element={<Suspense fallback={<Load />}><Agenda /></Suspense>} />
-        <Route path="reportes" element={<Suspense fallback={<Load />}><Reportes /></Suspense>} />
-        <Route path="etiquetas" element={<Suspense fallback={<Load />}><Etiquetas /></Suspense>} />
+        <Route path="taller" element={<Staff><Taller /></Staff>} />
+        <Route path="agenda" element={<Staff><Agenda /></Staff>} />
+        <Route path="reportes" element={<Staff><Reportes /></Staff>} />
+        <Route path="etiquetas" element={<Staff><Etiquetas /></Staff>} />
         <Route path="vencimientos" element={<Suspense fallback={<Load />}><Vencimientos /></Suspense>} />
-        <Route path="notificaciones" element={<Suspense fallback={<Load />}><Notificaciones /></Suspense>} />
+        <Route path="notificaciones" element={<Staff><Notificaciones /></Staff>} />
         <Route path="portal" element={<Suspense fallback={<Load />}><Portal /></Suspense>} />
-        <Route path="auditoria" element={<Suspense fallback={<Load />}><Auditoria /></Suspense>} />
-        <Route path="configuracion" element={<Suspense fallback={<Load />}><Configuracion /></Suspense>} />
+        <Route path="auditoria" element={<Staff><Auditoria /></Staff>} />
+        <Route path="configuracion" element={<Staff><Configuracion /></Staff>} />
       </Route>
       <Route path="*" element={<Navigate to={home} replace />} />
     </Routes>

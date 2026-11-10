@@ -73,7 +73,7 @@ function Calendario({ alertas, onDay }: { alertas: Alerta[]; onDay: (d: Date) =>
 }
 
 function Vencimientos({ clienteId }: { clienteId: number }) {
-  const { cliente, generarPlan } = useStore()
+  const { cliente, generarPlan, user } = useStore()
   const alertas = useAlertas(clienteId)
   const [generadas, setGeneradas] = useState<number | null>(null)
   const generar = () => setGeneradas(generarPlan(clienteId))
@@ -100,7 +100,7 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
       actions={<>
         <div className="seg"><button className={view === 'lista' ? 'on' : ''} onClick={() => setView('lista')}>Lista</button><button className={view === 'calendario' ? 'on' : ''} onClick={() => { setView('calendario'); setDia(null) }}>Calendario</button></div>
         <button className="btn secondary" onClick={download} disabled={!rows.length}><Download size={16} /> Exportar</button>
-        <button className="btn primary" onClick={generar}><Zap size={16} /> Generar órdenes</button>
+        {user?.rol !== 'CLIENTE' && <button className="btn primary" onClick={generar}><Zap size={16} /> Generar órdenes</button>}
       </>}>
       {generadas !== null && (
         <div className="card pad" style={{ display: 'flex', alignItems: 'center', gap: 10, background: generadas ? 'var(--ok-soft)' : 'var(--surface-2)', borderColor: 'transparent' }}>
