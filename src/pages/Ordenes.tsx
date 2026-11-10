@@ -6,7 +6,7 @@ import { informeEnsayoPDF } from '../lib/pdf'
 import type { Protocolo } from '../lib/types'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
-import { Badge, EmptyState } from '../components/ui'
+import { Badge, EmptyState, IconTile, iconOS, useIsMobile } from '../components/ui'
 import Signature from '../components/Signature'
 import { useStore } from '../lib/store'
 import { remitoPDF } from '../lib/pdf'
@@ -33,6 +33,7 @@ function Ordenes({ clienteId }: { clienteId: number }) {
   const [sel, setSel] = useState<OrdenServicio | null>(null)
   const [nueva, setNueva] = useState(false)
   const puedeEditar = user?.rol !== 'CLIENTE'
+  const isMobile = useIsMobile()
 
   const todas = useMemo(() => db.ordenes.filter((o) => o.clienteId === clienteId), [db.ordenes, clienteId])
   const abiertas = todas.filter((o) => o.situacion !== 'Cerrada').length
@@ -61,22 +62,46 @@ function Ordenes({ clienteId }: { clienteId: number }) {
         </div>
       </div>
 
-      {rows.length === 0 ? <div className="card"><EmptyState>No hay órdenes con esos filtros.</EmptyState></div> : view === 'lista' ? (
+      {rows.length === 0 ? <div className="card"><EmptyState>No hay órdenes con esos filtros.</EmptyState></div> : view === 'lista' && isMobile ? (
+        <div className="mcards stagger">
+          {rows.map((o) => {
+            const dias = o.situacion !== 'Cerrada' ? diasDesde(o.aperturaISO) : null
+            const tone = situTone(o.situacion)
+            return (
+              <button key={o.id} className={`mcard acc-${tone}`} onClick={() => setSel(o)}>
+                <IconTile icon={iconOS(o.tipo)} tone={tone} size={42} />
+                <div className="mc-body">
+                  <div className="mc-title">{clean(o.titulo)}</div>
+                  <div className="mc-sub">{o.numero} · {o.taller}</div>
+                  <div className="mc-chips">
+                    <Badge tone={tone}>{o.situacion}</Badge>
+                    {o.origen === 'Portal' && <Badge tone="accent">Cliente</Badge>}
+                  </div>
+                </div>
+                <div className="mc-right">
+                  {dias != null && <span className="big mono" style={{ color: dias > 100 ? 'var(--danger)' : undefined }}>{dias}d</span>}
+                  <span className="faint small">{fecha(o.aperturaISO)}</span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      ) : view === 'lista' ? (
         <div className="card">
           <div className="tbl-wrap">
-            <table className="tbl cards">
+            <table className="tbl">
               <thead><tr><th>OS</th><th>Título</th><th>Tipo</th><th>Situación</th><th>Taller</th><th className="num">Días</th></tr></thead>
               <tbody>
                 {rows.map((o) => {
                   const dias = o.situacion !== 'Cerrada' ? diasDesde(o.aperturaISO) : null
                   return (
                     <tr key={o.id} onClick={() => setSel(o)}>
-                      <td data-label="OS"><span className="mono small">{o.numero}</span><div className="faint small">{fecha(o.aperturaISO)}</div></td>
-                      <td data-label="Título"><div className="row-strong">{clean(o.titulo)}</div><div className="faint small">{clean(o.descripcion)}</div></td>
-                      <td data-label="Tipo">{o.tipo}</td>
-                      <td data-label="Situación"><Badge tone={situTone(o.situacion)}>{o.situacion}</Badge></td>
-                      <td data-label="Taller">{o.taller}</td>
-                      <td data-label="Días" className="num mono" style={{ color: dias != null && dias > 100 ? 'var(--danger)' : undefined }}>{dias ?? '—'}</td>
+                      <td><span className="mono small">{o.numero}</span><div className="faint small">{fecha(o.aperturaISO)}</div></td>
+                      <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><IconTile icon={iconOS(o.tipo)} tone={situTone(o.situacion)} size={34} /><div><div className="row-strong">{clean(o.titulo)}</div><div className="faint small">{clean(o.descripcion)}</div></div></div></td>
+                      <td>{o.tipo}</td>
+                      <td><Badge tone={situTone(o.situacion)}>{o.situacion}</Badge></td>
+                      <td>{o.taller}</td>
+                      <td className="num mono" style={{ color: dias != null && dias > 100 ? 'var(--danger)' : undefined }}>{dias ?? '—'}</td>
                     </tr>
                   )
                 })}

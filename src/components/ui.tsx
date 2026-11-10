@@ -1,8 +1,62 @@
-import type { ReactNode } from 'react'
-import { AlertTriangle, Inbox } from 'lucide-react'
+import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
+import {
+  Activity, AlertTriangle, Baby, BedDouble, ClipboardList, FlaskConical, Gauge, HeartPulse,
+  Inbox, Package, PackagePlus, Radiation, ScanLine, Stethoscope, Syringe, Wind, Wrench, Zap, ShieldCheck, CalendarClock,
+} from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import type { EstadoEquipo, EstadoVig } from '../lib/types'
 import { pct } from '../lib/format'
+
+export function useIsMobile(bp = 760) {
+  const [m, setM] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= bp : false))
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${bp}px)`)
+    const on = () => setM(mq.matches)
+    on()
+    mq.addEventListener('change', on)
+    return () => mq.removeEventListener('change', on)
+  }, [bp])
+  return m
+}
+
+type LIcon = ComponentType<{ size?: number | string; className?: string }>
+
+const EQ_ICON: { re: RegExp; icon: LIcon }[] = [
+  { re: /ventilador|respirador/i, icon: Wind },
+  { re: /bomba/i, icon: Syringe },
+  { re: /desfibril|cardiodes/i, icon: HeartPulse },
+  { re: /electrocardi|monitor/i, icon: Activity },
+  { re: /electrobistur/i, icon: Zap },
+  { re: /anestesia/i, icon: Gauge },
+  { re: /autoclave|esteriliz/i, icon: FlaskConical },
+  { re: /incubadora|neonat|cuna/i, icon: Baby },
+  { re: /arco en c|rayos|tomograf|radiolog/i, icon: Radiation },
+  { re: /ecograf|ultrason|doppler/i, icon: ScanLine },
+  { re: /cama|camilla/i, icon: BedDouble },
+  { re: /aspirador/i, icon: Wind },
+]
+export function iconEquipo(tipo: string): LIcon {
+  return EQ_ICON.find((x) => x.re.test(tipo))?.icon ?? Stethoscope
+}
+
+const OS_ICON: Record<string, LIcon> = {
+  'Reparación': Wrench,
+  'Mantenimiento preventivo': CalendarClock,
+  'Certificación': ShieldCheck,
+  'Instalación': PackagePlus,
+  'Provisión': Package,
+}
+export function iconOS(tipo: string): LIcon {
+  return OS_ICON[tipo] ?? ClipboardList
+}
+
+export function IconTile({ icon: Icon, tone = 'brand', size = 40 }: { icon: LIcon; tone?: Tone; size?: number }) {
+  return (
+    <span className={`icon-tile tone-${tone}`} style={{ width: size, height: size }}>
+      <Icon size={Math.round(size * 0.5)} />
+    </span>
+  )
+}
 
 type Tone = 'brand' | 'ok' | 'warn' | 'danger' | 'info' | 'accent' | 'neutral'
 

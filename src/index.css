@@ -340,3 +340,31 @@ table.tbl { width: 100%; border-collapse: collapse; }
   .cal-pill { display: none; }
   .cal-dot { width: 6px; height: 6px; border-radius: 50%; }
 }
+
+/* ===== Realce estético v2 ===== */
+.icon-tile { display: inline-grid; place-items: center; border-radius: 11px; flex: none; color: #fff; background: linear-gradient(145deg, var(--tone, var(--brand)), color-mix(in srgb, var(--tone, var(--brand)) 60%, #ffffff30)); box-shadow: 0 4px 12px -5px var(--tone, var(--brand)), inset 0 1px 0 rgba(255,255,255,.3); }
+.icon-tile.tone-ok { --tone: var(--ok); } .icon-tile.tone-warn { --tone: var(--warn); } .icon-tile.tone-danger { --tone: var(--danger); } .icon-tile.tone-info { --tone: var(--info); } .icon-tile.tone-accent { --tone: var(--signal); } .icon-tile.tone-brand { --tone: var(--brand); } .icon-tile.tone-neutral { --tone: var(--text-3); }
+
+/* entrada escalonada de filas y tarjetas */
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.stagger > * { animation: rise .32s both; }
+.stagger > *:nth-child(1){animation-delay:.02s}.stagger > *:nth-child(2){animation-delay:.05s}.stagger > *:nth-child(3){animation-delay:.08s}.stagger > *:nth-child(4){animation-delay:.11s}.stagger > *:nth-child(5){animation-delay:.14s}.stagger > *:nth-child(6){animation-delay:.17s}.stagger > *:nth-child(7){animation-delay:.2s}.stagger > *:nth-child(8){animation-delay:.23s}.stagger > *:nth-child(n+9){animation-delay:.26s}
+.kpi-row.stagger > * { animation-duration: .4s; }
+
+/* Tarjetas de lista (mobile y también usables en desktop) */
+.mcards { display: grid; gap: 12px; }
+.mcard { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 13px 14px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; text-align: left; width: 100%; transition: transform .1s, box-shadow .15s, border-color .15s; }
+.mcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--acc, var(--brand)); }
+.mcard:hover { box-shadow: var(--shadow); border-color: var(--border-strong); }
+.mcard:active { transform: scale(.985); }
+.mcard .mc-body { min-width: 0; }
+.mcard .mc-title { font-weight: 650; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.01em; }
+.mcard .mc-sub { color: var(--text-2); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+.mcard .mc-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
+.mcard .mc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; text-align: right; }
+.mcard .mc-right .big { font-family: var(--ff-d); font-weight: 800; font-size: 17px; line-height: 1; }
+
+/* acentos por tono */
+.acc-ok { --acc: var(--ok); } .acc-warn { --acc: var(--warn); } .acc-danger { --acc: var(--danger); } .acc-info { --acc: var(--info); } .acc-brand { --acc: var(--brand); } .acc-accent { --acc: var(--signal); } .acc-neutral { --acc: var(--text-3); }
+
+@media (prefers-reduced-motion: reduce) { .stagger > *, .mcard { animation: none !important; } }

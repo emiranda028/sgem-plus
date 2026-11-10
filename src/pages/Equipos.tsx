@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ChevronRight, Download, Printer, QrCode, Search, Stethoscope, X } from 'lucide-react'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
-import { Badge, EmptyState, EstadoBadge, VigBadge } from '../components/ui'
+import { Badge, EmptyState, EstadoBadge, IconTile, VigBadge, iconEquipo, useIsMobile } from '../components/ui'
 import { Qr } from '../components/Qr'
 import { useStore } from '../lib/store'
 import { certificadoPDF } from '../lib/pdf'
@@ -14,6 +14,7 @@ const PAGE = 40
 
 function Lista({ clienteId, readOnly }: { clienteId: number; readOnly?: boolean }) {
   const { db, cliente } = useStore()
+  const isMobile = useIsMobile()
   const [q, setQ] = useState('')
   const [servicio, setServicio] = useState('')
   const [tipo, setTipo] = useState('')
@@ -67,23 +68,49 @@ function Lista({ clienteId, readOnly }: { clienteId: number; readOnly?: boolean 
           <select className="sel" value={tipo} onChange={(e) => setTipo(e.target.value)}><option value="">Todos los tipos</option>{opts.tipos.map((t) => <option key={t}>{t}</option>)}</select>
           <select className="sel" value={estado} onChange={(e) => setEstado(e.target.value)}><option value="">Todos los estados</option>{opts.estados.map((t) => <option key={t}>{t}</option>)}</select>
         </div>
-        {rows.length === 0 ? <EmptyState icon={<Stethoscope size={22} />}>No hay equipos con esos filtros.</EmptyState> : (
+        {rows.length === 0 ? <EmptyState icon={<Stethoscope size={22} />}>No hay equipos con esos filtros.</EmptyState> : isMobile ? (
+          <>
+            <div className="mcards stagger">
+              {rows.slice(0, limit).map((e) => {
+                const c = e.certificable ? certOf(e.id) : null
+                const estadoTone = e.estado === 'OPERATIVO' ? 'ok' : e.estado === 'EN TALLER' ? 'warn' : e.estado === 'FUERA DE SERVICIO' ? 'danger' : 'neutral'
+                const cv = c ? vigencia(c.vencimientoISO) : null
+                return (
+                  <button key={e.id} className={`mcard acc-${estadoTone}`} onClick={() => setSel(e)}>
+                    <IconTile icon={iconEquipo(e.tipo)} tone={estadoTone} size={42} />
+                    <div className="mc-body">
+                      <div className="mc-title">{e.tipo}</div>
+                      <div className="mc-sub">{e.fabricante} {e.modelo} · {servicios.get(e.servicioId)}</div>
+                      <div className="mc-chips">
+                        <EstadoBadge estado={e.estado} />
+                        {cv && <VigBadge estado={cv} />}
+                      </div>
+                    </div>
+                    <div className="mc-right"><span className="faint small mono">{e.serie}</span></div>
+                  </button>
+                )
+              })}
+            </div>
+            {limit < rows.length && <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 16 }}><button className="btn secondary" onClick={() => setLimit((l) => l + PAGE * 2)}>Mostrar más ({rows.length - limit})</button></div>}
+          </>
+        ) : (
           <>
             <div className="tbl-wrap">
-              <table className="tbl cards">
+              <table className="tbl">
                 <thead><tr><th>Equipo</th><th>Serie</th><th>Servicio</th><th>Estado</th><th>Certificación</th><th>Preventivo</th><th /></tr></thead>
                 <tbody>
                   {rows.slice(0, limit).map((e) => {
                     const c = e.certificable ? certOf(e.id) : null
                     const m = e.mantenible ? mpOf(e.id) : null
+                    const estadoTone = e.estado === 'OPERATIVO' ? 'ok' : e.estado === 'EN TALLER' ? 'warn' : e.estado === 'FUERA DE SERVICIO' ? 'danger' : 'neutral'
                     return (
                       <tr key={e.id} onClick={() => setSel(e)}>
-                        <td data-label="Equipo"><div className="row-strong">{e.tipo}</div><div className="faint small">{e.fabricante} · {e.modelo}</div></td>
-                        <td data-label="Serie"><span className="mono small">{e.serie}</span></td>
-                        <td data-label="Servicio">{servicios.get(e.servicioId)}</td>
-                        <td data-label="Estado"><EstadoBadge estado={e.estado} /></td>
-                        <td data-label="Certificación">{c ? <VigBadge estado={vigencia(c.vencimientoISO)} /> : <span className="faint small">No aplica</span>}</td>
-                        <td data-label="Preventivo">{m ? <VigBadge estado={vigencia(m.proximoISO)} /> : <span className="faint small">No aplica</span>}</td>
+                        <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><IconTile icon={iconEquipo(e.tipo)} tone={estadoTone} size={34} /><div><div className="row-strong">{e.tipo}</div><div className="faint small">{e.fabricante} · {e.modelo}</div></div></div></td>
+                        <td><span className="mono small">{e.serie}</span></td>
+                        <td>{servicios.get(e.servicioId)}</td>
+                        <td><EstadoBadge estado={e.estado} /></td>
+                        <td>{c ? <VigBadge estado={vigencia(c.vencimientoISO)} /> : <span className="faint small">No aplica</span>}</td>
+                        <td>{m ? <VigBadge estado={vigencia(m.proximoISO)} /> : <span className="faint small">No aplica</span>}</td>
                         <td style={{ textAlign: 'right' }}><ChevronRight size={17} style={{ color: 'var(--text-3)' }} /></td>
                       </tr>
                     )
