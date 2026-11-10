@@ -144,6 +144,16 @@ function Ficha({ equipo, onClose, readOnly }: { equipo: Equipo; onClose: () => v
           <button className="icon-btn" onClick={onClose}><X size={18} /></button>
         </div>
         <div className="drawer-body">
+          {(() => { const Ic = iconEquipo(equipo.tipo); const ht = equipo.estado === 'OPERATIVO' ? 'ok' : equipo.estado === 'EN TALLER' ? 'warn' : equipo.estado === 'FUERA DE SERVICIO' ? 'danger' : 'brand'; return (
+            <div className={`hero ht-${ht}`}>
+              <span className="h-ic"><Ic size={28} /></span>
+              <div className="h-body">
+                <div className="h-kicker">{equipo.qr}</div>
+                <div className="h-title">{equipo.tipo}</div>
+                <div className="h-sub">{equipo.fabricante} {equipo.modelo} · S/N {equipo.serie}</div>
+              </div>
+            </div>
+          ) })()}
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
             <EstadoBadge estado={equipo.estado} />
             <Badge tone={equipo.criticidad === 'ALTA' ? 'danger' : equipo.criticidad === 'MEDIA' ? 'warn' : 'neutral'}>Criticidad {equipo.criticidad}</Badge>

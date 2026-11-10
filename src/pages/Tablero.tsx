@@ -4,12 +4,17 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import { BadgeCheck, CalendarClock, Stethoscope, Wrench } from 'lucide-react'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
-import { CHART_COLORS, Donut, EmptyState, Kpi, Progress } from '../components/ui'
+import { Badge, CHART_COLORS, Donut, EmptyState, IconTile, Kpi, Progress, iconOS, useIsMobile } from '../components/ui'
 import { useStore } from '../lib/store'
-import { diasDesde, fecha, pct, vigencia } from '../lib/format'
+import { clean, diasDesde, fecha, pct, vigencia } from '../lib/format'
+
+function situTone(s: string): 'ok' | 'danger' | 'warn' {
+  return s === 'Cerrada' || s === 'Lista' ? 'ok' : s === 'Esperando repuesto' ? 'danger' : 'warn'
+}
 
 function Tab({ clienteId }: { clienteId: number }) {
   const { db, cliente } = useStore()
+  const isMobile = useIsMobile()
   const d = useMemo(() => {
     const equipos = db.equipos.filter((e) => e.clienteId === clienteId && e.estado !== 'BAJA')
     const servicios = db.servicios.filter((s) => s.clienteId === clienteId)
@@ -63,6 +68,24 @@ function Tab({ clienteId }: { clienteId: number }) {
       <div className="grid-dash">
         <div className="card">
           <div className="card-head"><h3>Estado por servicio</h3><span className="faint small">{d.porServicio.length} servicios</span></div>
+          {isMobile ? (
+            <div className="card-body stagger" style={{ display: 'grid', gap: 10 }}>
+              {d.porServicio.map((s) => {
+                const cp = pct(s.cert.ok, s.cert.total), mpp = pct(s.mp.ok, s.mp.total)
+                return (
+                  <div key={s.id} className="svc-card">
+                    <div className="sc-top">
+                      <span className="sc-name">{s.nombre}</span>
+                      {s.taller > 0 && <Badge tone="warn">{s.taller} en taller</Badge>}
+                      <span className="sc-count">{s.equipos}</span>
+                    </div>
+                    {s.cert.total > 0 && <div className="sc-bar"><span className="lbl">Certif.</span><Progress value={cp} tone={cp >= 80 ? 'ok' : cp >= 50 ? 'warn' : 'danger'} /><span className="val">{s.cert.ok}/{s.cert.total}</span></div>}
+                    {s.mp.total > 0 && <div className="sc-bar"><span className="lbl">Prevent.</span><Progress value={mpp} tone={mpp >= 80 ? 'ok' : mpp >= 50 ? 'warn' : 'danger'} /><span className="val">{s.mp.ok}/{s.mp.total}</span></div>}
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
           <div className="tbl-wrap">
             <table className="tbl cards">
               <thead><tr><th>Servicio</th><th className="num">Equipos</th><th className="num">Taller</th><th>Certificación</th><th>Preventivo</th></tr></thead>
@@ -87,6 +110,7 @@ function Tab({ clienteId }: { clienteId: number }) {
               </tbody>
             </table>
           </div>
+          )}
         </div>
 
         <div style={{ display: 'grid', gap: 20 }}>
@@ -110,6 +134,25 @@ function Tab({ clienteId }: { clienteId: number }) {
 
       <div className="card">
         <div className="card-head"><h3>Últimas órdenes de servicio</h3><Link to="/ordenes" className="btn ghost sm">Ver todas</Link></div>
+        {isMobile ? (
+          <div className="card-body mcards stagger">
+            {d.ordenes.slice(0, 6).map((o) => {
+              const tone = situTone(o.situacion)
+              const dias = o.situacion !== 'Cerrada' ? diasDesde(o.aperturaISO) : null
+              return (
+                <Link key={o.id} to="/ordenes" className={`mcard acc-${tone}`}>
+                  <IconTile icon={iconOS(o.tipo)} tone={tone} size={40} />
+                  <div className="mc-body">
+                    <div className="mc-title">{clean(o.titulo)}</div>
+                    <div className="mc-sub">{o.numero}</div>
+                    <div className="mc-chips"><Badge tone={tone}>{o.situacion}</Badge></div>
+                  </div>
+                  <div className="mc-right">{dias != null && <span className="big mono">{dias}d</span>}<span className="faint small">{fecha(o.aperturaISO)}</span></div>
+                </Link>
+              )
+            })}
+          </div>
+        ) : (
         <div className="tbl-wrap">
           <table className="tbl cards">
             <thead><tr><th>OS</th><th>Título</th><th>Situación</th><th className="num">Antigüedad</th></tr></thead>
@@ -125,6 +168,7 @@ function Tab({ clienteId }: { clienteId: number }) {
             </tbody>
           </table>
         </div>
+        )}
       </div>
     </Page>
   )

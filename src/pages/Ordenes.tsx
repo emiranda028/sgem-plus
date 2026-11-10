@@ -203,6 +203,16 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
           <button className="icon-btn" onClick={onClose}><X size={18} /></button>
         </div>
         <div className="drawer-body">
+          {(() => { const Ic = iconOS(orden.tipo); const ht = situTone(orden.situacion); return (
+            <div className={`hero ht-${ht}`}>
+              <span className="h-ic"><Ic size={28} /></span>
+              <div className="h-body">
+                <div className="h-kicker">{orden.numero} · {orden.tipo}</div>
+                <div className="h-title">{clean(orden.titulo)}</div>
+                <div className="h-sub">{orden.taller} · {orden.tecnico}</div>
+              </div>
+            </div>
+          ) })()}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <Badge tone={situTone(orden.situacion)}>{orden.situacion}</Badge>
             <Badge tone={orden.criticidad === 'ALTA' ? 'danger' : orden.criticidad === 'MEDIA' ? 'warn' : 'neutral'}>{orden.criticidad}</Badge>

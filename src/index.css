@@ -368,3 +368,26 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .acc-ok { --acc: var(--ok); } .acc-warn { --acc: var(--warn); } .acc-danger { --acc: var(--danger); } .acc-info { --acc: var(--info); } .acc-brand { --acc: var(--brand); } .acc-accent { --acc: var(--signal); } .acc-neutral { --acc: var(--text-3); }
 
 @media (prefers-reduced-motion: reduce) { .stagger > *, .mcard { animation: none !important; } }
+
+/* ===== Hero / tarjetas de detalle v3 ===== */
+.hero { border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center; position: relative; overflow: hidden; color: #fff; background: linear-gradient(135deg, var(--h1,#0a3f52), var(--h2,#0e7490) 55%, var(--h3,#15a6c4)); box-shadow: var(--shadow); }
+.hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(420px 180px at 90% -20%, rgba(255,255,255,.18), transparent 60%); pointer-events: none; }
+.hero .h-ic { width: 54px; height: 54px; border-radius: 14px; background: rgba(255,255,255,.16); display: grid; place-items: center; flex: none; backdrop-filter: blur(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
+.hero .h-body { min-width: 0; position: relative; z-index: 1; }
+.hero .h-kicker { font-family: var(--ff-m); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+.hero .h-title { font-family: var(--ff-d); font-weight: 800; font-size: 19px; line-height: 1.1; letter-spacing: -.02em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero .h-sub { font-size: 13px; opacity: .9; margin-top: 3px; }
+.hero.ht-ok { --h1:#0b5f33; --h2:#13893f; --h3:#2bbf6a; }
+.hero.ht-warn { --h1:#8a5406; --h2:#bf7408; --h3:#e0a23d; }
+.hero.ht-danger { --h1:#8f241d; --h2:#c0332a; --h3:#ef655b; }
+.hero.ht-brand { --h1:#0a3f52; --h2:#0e7490; --h3:#15a6c4; }
+.hero.ht-accent { --h1:#312b86; --h2:#4f46e5; --h3:#8a83f7; }
+
+/* Tarjeta de servicio (tablero mobile) */
+.svc-card { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; padding: 14px; box-shadow: var(--shadow-sm); display: grid; gap: 10px; }
+.svc-card .sc-top { display: flex; align-items: center; gap: 10px; }
+.svc-card .sc-name { font-weight: 650; flex: 1; min-width: 0; }
+.svc-card .sc-count { font-family: var(--ff-d); font-weight: 800; font-size: 20px; }
+.svc-card .sc-bar { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; align-items: center; font-size: 12px; }
+.svc-card .sc-bar .lbl { color: var(--text-2); }
+.svc-card .sc-bar .val { font-variant-numeric: tabular-nums; color: var(--text-2); white-space: nowrap; }
