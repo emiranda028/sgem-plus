@@ -97,7 +97,7 @@ export default function Layout() {
           )}
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
             <AlertsBell />
-            <button className="icon-btn" onClick={toggle} title="Tema" aria-label="Cambiar tema">
+            <button className="icon-btn only-desktop" onClick={toggle} title="Tema" aria-label="Cambiar tema">
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <UserMenu />

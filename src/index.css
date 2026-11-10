@@ -438,3 +438,13 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .ag-item .ai-body { min-width: 0; flex: 1; }
 .ag-item .ai-t { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ag-item .ai-s { font-size: 11.5px; color: var(--text-2); }
+
+/* ===== Topbar mobile: asegurar que el menú de usuario entre ===== */
+.only-desktop { display: initial; }
+.topbar .cpick { min-width: 0; }
+@media (max-width: 760px) {
+  .only-desktop { display: none !important; }
+  .topbar { gap: 8px; }
+  .topbar > div:last-child { flex: none; }
+  .cpick-trigger { gap: 7px; padding: 0 10px; }
+}
