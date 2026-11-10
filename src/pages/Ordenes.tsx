@@ -1,16 +1,15 @@
 import { useMemo, useState } from 'react'
 import { useRef } from 'react'
-import { Camera, ClipboardCheck, Download, FileSignature, Plus, Search, Trash2, X } from 'lucide-react'
+import { Award, Camera, CheckCircle2, Circle, CircleDot, ClipboardCheck, Clock, Download, FileSignature, Plus, Search, Trash2, UserRound, X } from 'lucide-react'
 import { plantillaProtocolo } from '../lib/protocolos'
-import { informeEnsayoPDF } from '../lib/pdf'
-import type { Protocolo } from '../lib/types'
+import { certificadoPDF, informeEnsayoPDF, remitoPDF } from '../lib/pdf'
+import type { EstadoTarea, Protocolo } from '../lib/types'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { Badge, EmptyState, IconTile, iconOS, useIsMobile } from '../components/ui'
 import Signature from '../components/Signature'
 import { useStore } from '../lib/store'
-import { remitoPDF } from '../lib/pdf'
-import { clean, diasDesde, fecha, normalize } from '../lib/format'
+import { clean, diasDesde, diasHasta, fecha, normalize } from '../lib/format'
 import type { OrdenServicio, SituacionOS, TipoOS } from '../lib/types'
 
 const SITU: SituacionOS[] = ['Abierta', 'En taller', 'Esperando repuesto', 'Presupuestar', 'Lista', 'Cerrada']
@@ -144,14 +143,36 @@ function Ordenes({ clienteId }: { clienteId: number }) {
 }
 
 function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClose: () => void; puedeEditar: boolean }) {
-  const { db, addAccion, updateOrden } = useStore()
+  const { db, addAccion, addTarea, updateAccion, emitirCertificado, updateOrden } = useStore()
   const equipo = db.equipos.find((e) => e.id === orden.equipoId) ?? null
   const cliente = db.clientes.find((c) => c.id === orden.clienteId)!
   const tecnicos = useMemo(() => [...new Set([orden.tecnico, ...db.ordenes.map((o) => o.tecnico)].filter((t) => t && t !== 'sistema'))].sort(), [db.ordenes, orden.tecnico])
   const [nota, setNota] = useState('')
+  const [tareaResp, setTareaResp] = useState('')
+  const [tareaVence, setTareaVence] = useState('')
   const [firmando, setFirmando] = useState(false)
   const [firma, setFirma] = useState('')
   const [firmante, setFirmante] = useState('')
+  // emisión de certificado
+  const certCount = useMemo(() => db.ordenes.filter((o) => o.certificado).length, [db.ordenes])
+  const [emitiendo, setEmitiendo] = useState(false)
+  const [certNro, setCertNro] = useState('')
+  const [certMeses, setCertMeses] = useState(12)
+  const [certFirma, setCertFirma] = useState('')
+  const [certFirmante, setCertFirmante] = useState('')
+  const agregarTarea = () => {
+    if (!nota.trim()) return
+    addTarea(orden.id, { nota: nota.trim(), responsable: tareaResp || undefined, venceISO: tareaVence ? new Date(tareaVence + 'T12:00:00').toISOString() : undefined })
+    setNota(''); setTareaResp(''); setTareaVence('')
+  }
+  const ESTADO_NEXT: Record<EstadoTarea, EstadoTarea> = { pendiente: 'en_curso', en_curso: 'hecha', hecha: 'pendiente' }
+  const abrirEmision = () => { setCertNro(`CERT-${new Date().getFullYear()}-${String(certCount + 1).padStart(4, '0')}`); setCertMeses(12); setCertFirma(''); setCertFirmante(''); setEmitiendo(true) }
+  const confirmarEmision = () => {
+    if (!equipo || !certNro.trim()) return
+    const cert = emitirCertificado(orden.id, equipo.id, { numero: certNro.trim(), meses: certMeses, firmaDataUrl: certFirma || undefined, firmante: certFirmante || undefined, norma: orden.protocolo?.norma })
+    setEmitiendo(false)
+    certificadoPDF(equipo, cliente, cert.numero, cert.vencimientoISO)
+  }
   const fileRef = useRef<HTMLInputElement>(null)
   const fotos = orden.fotosData ?? []
 
@@ -249,18 +270,39 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
           </div>
 
           <div>
-            <b style={{ fontSize: 14, display: 'block', marginBottom: 10 }}>Acciones</b>
-            <ul className="timeline">
-              {orden.acciones.map((a) => (
-                <li key={a.id}><div className="t-date">{fecha(a.fechaISO)} · {a.usuario}</div><div className="t-body" style={{ fontWeight: 400 }}>{a.nota}</div></li>
-              ))}
-            </ul>
+            <b style={{ fontSize: 14, display: 'block', marginBottom: 10 }}>Acciones y tareas</b>
             {puedeEditar && (
-              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                <input className="search" style={{ flex: 1 }} placeholder="Agregar una acción…" value={nota} onChange={(e) => setNota(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && nota.trim()) { addAccion(orden.id, nota.trim()); setNota('') } }} />
-                <button className="btn secondary" disabled={!nota.trim()} onClick={() => { addAccion(orden.id, nota.trim()); setNota('') }}>Agregar</button>
+              <div className="tarea-add">
+                <input className="search" placeholder="Nueva tarea o acción…" value={nota} onChange={(e) => setNota(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') agregarTarea() }} />
+                <div className="tarea-add-row">
+                  <select className="sel" value={tareaResp} onChange={(e) => setTareaResp(e.target.value)}><option value="">Responsable…</option>{tecnicos.map((t) => <option key={t}>{t}</option>)}</select>
+                  <input className="sel" type="date" value={tareaVence} onChange={(e) => setTareaVence(e.target.value)} title="Fecha límite" />
+                  <button className="btn primary sm" disabled={!nota.trim()} onClick={agregarTarea}><Plus size={15} /> Agregar</button>
+                </div>
               </div>
             )}
+            <ul className="tasks">
+              {orden.acciones.map((a) => (a.tipo === 'tarea' ? (
+                <li key={a.id} className={`task est-${a.estado}`}>
+                  <button className="task-check" disabled={!puedeEditar} onClick={() => updateAccion(orden.id, a.id, { estado: ESTADO_NEXT[a.estado ?? 'pendiente'] })} title="Cambiar estado" aria-label="Cambiar estado">
+                    {a.estado === 'hecha' ? <CheckCircle2 size={20} /> : a.estado === 'en_curso' ? <CircleDot size={20} /> : <Circle size={20} />}
+                  </button>
+                  <div className="task-body">
+                    <div className="task-t">{a.nota}</div>
+                    <div className="task-meta">
+                      {a.responsable && <span className="task-chip"><UserRound size={12} /> {a.responsable}</span>}
+                      {a.venceISO && (() => { const d = diasHasta(a.venceISO) ?? 0; const bad = d < 0 && a.estado !== 'hecha'; return <span className={`task-chip ${bad ? 'bad' : ''}`}><Clock size={12} /> {fecha(a.venceISO)}{bad ? ` · vencida` : ''}</span> })()}
+                      <span className="task-chip faint">{a.usuario}</span>
+                    </div>
+                  </div>
+                </li>
+              ) : (
+                <li key={a.id} className="task note">
+                  <span className="task-dot" />
+                  <div className="task-body"><div className="task-t">{a.nota}</div><div className="task-meta"><span className="task-chip faint">{fecha(a.fechaISO)} · {a.usuario}</span></div></div>
+                </li>
+              )))}
+            </ul>
           </div>
 
           <div>
@@ -308,6 +350,45 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
               </div>
             )}
           </div>
+
+          {equipo && (orden.protocolo?.resultado === 'APTO' || orden.certificado) && (
+            <div>
+              <b style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}><Award size={15} style={{ color: 'var(--brand)' }} /> Certificación</b>
+              {orden.certificado ? (
+                <div className="cert-card">
+                  <div className="cert-top">
+                    <span className="cert-ic"><Award size={22} /></span>
+                    <div className="cert-ttl"><b>Certificado N° {orden.certificado.numero}</b><span>{orden.certificado.norma}</span></div>
+                    <Badge tone="ok">Vigente</Badge>
+                  </div>
+                  <div className="cert-rows">
+                    <Row k="Emitido" v={fecha(orden.certificado.fechaISO)} />
+                    <Row k="Vigente hasta" v={fecha(orden.certificado.vencimientoISO)} />
+                    {orden.certificado.firmante && <Row k="Firmado por" v={orden.certificado.firmante} />}
+                  </div>
+                  <button className="btn secondary sm" style={{ marginTop: 10 }} onClick={() => certificadoPDF(equipo, cliente, orden.certificado!.numero, orden.certificado!.vencimientoISO)}><Download size={14} /> Descargar certificado PDF</button>
+                </div>
+              ) : emitiendo ? (
+                <div className="card pad" style={{ display: 'grid', gap: 12 }}>
+                  <div className="faint small">El protocolo dio <b style={{ color: 'var(--ok)' }}>APTO</b>. Emití el certificado: se genera el PDF y se actualiza la vigencia del equipo.</div>
+                  <div className="grid-2" style={{ gap: 12 }}>
+                    <div className="field"><label>N° de certificado</label><input value={certNro} onChange={(e) => setCertNro(e.target.value)} /></div>
+                    <div className="field"><label>Vigencia</label><select value={certMeses} onChange={(e) => setCertMeses(Number(e.target.value))}><option value={6}>6 meses</option><option value={12}>12 meses</option><option value={24}>24 meses</option></select></div>
+                  </div>
+                  <div className="field"><label>Responsable que firma (opcional)</label><input value={certFirmante} onChange={(e) => setCertFirmante(e.target.value)} placeholder="Ing. responsable" /></div>
+                  <Signature onChange={setCertFirma} />
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <button className="btn ghost sm" onClick={() => setEmitiendo(false)}>Cancelar</button>
+                    <button className="btn primary sm" disabled={!certNro.trim()} onClick={confirmarEmision}><Award size={15} /> Emitir y descargar</button>
+                  </div>
+                </div>
+              ) : (
+                puedeEditar
+                  ? <button className="btn primary sm" onClick={abrirEmision}><Award size={15} /> Emitir certificado</button>
+                  : <span className="faint small">Protocolo APTO. Pendiente de emisión del certificado.</span>
+              )}
+            </div>
+          )}
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>

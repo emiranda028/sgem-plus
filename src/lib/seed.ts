@@ -1,4 +1,5 @@
 import type {
+  AccionOS,
   Certificacion,
   Cliente,
   DB,
@@ -229,10 +230,15 @@ export function buildSeed(): DB {
     const cierre = abierta ? null : addDays(apertura, int(2, 40))
     const num = `OS-${apertura.getFullYear()}${String(apertura.getMonth() + 1).padStart(2, '0')}${String(1000 + i)}`
     const tecnico = pick(tecnicos)
-    const acciones = [
-      { id: 1, fechaISO: iso(apertura), usuario: tecnico, nota: 'Orden abierta. ' + pick(descs) },
+    const acciones: AccionOS[] = [
+      { id: 1, fechaISO: iso(apertura), usuario: tecnico, nota: 'Orden abierta. ' + pick(descs), tipo: 'nota' },
     ]
-    if (!abierta && cierre) acciones.push({ id: 2, fechaISO: iso(cierre), usuario: tecnico, nota: 'Trabajo finalizado y equipo entregado.' })
+    if (abierta) {
+      const TAREAS = ['Diagnóstico inicial del equipo', 'Solicitar repuesto al proveedor', 'Realizar pruebas de seguridad eléctrica', 'Coordinar retiro con el servicio', 'Actualizar firmware', 'Verificar calibración']
+      acciones.push({ id: 2, fechaISO: iso(apertura), usuario: tecnico, nota: pick(TAREAS), tipo: 'tarea', estado: 'hecha', responsable: tecnico })
+      acciones.push({ id: 3, fechaISO: iso(apertura), usuario: tecnico, nota: pick(TAREAS), tipo: 'tarea', estado: chance(0.5) ? 'en_curso' : 'pendiente', responsable: tecnico, venceISO: iso(addDays(apertura, int(3, 20))) })
+    }
+    if (!abierta && cierre) acciones.push({ id: 2, fechaISO: iso(cierre), usuario: tecnico, nota: 'Trabajo finalizado y equipo entregado.', tipo: 'nota' })
     ordenes.push({
       id: i + 1,
       numero: num,
@@ -264,7 +270,7 @@ export function buildSeed(): DB {
   ]
 
   return {
-    version: 4,
+    version: 5,
     usuarios,
     clientes,
     servicios,

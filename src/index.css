@@ -474,3 +474,35 @@ table.tbl { width: 100%; border-collapse: collapse; }
   .cpick-trigger { gap: 8px; padding: 5px 10px; height: auto; min-height: 42px; align-items: center; }
   .cpick-trigger .nm { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.14; font-size: 12.5px; }
 }
+
+/* ===== Tareas / acciones de la OS ===== */
+.tarea-add { display: grid; gap: 8px; margin-bottom: 14px; }
+.tarea-add-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tarea-add-row .sel { min-width: 0; width: 100%; }
+.tarea-add-row .btn { grid-column: 1 / -1; justify-content: center; }
+.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.task { display: flex; gap: 10px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 10px 12px; }
+.task.est-hecha { background: var(--surface-2); }
+.task-check { flex: none; color: var(--text-3); display: grid; place-items: center; margin-top: 1px; }
+.task-check:disabled { cursor: default; }
+.task.est-en_curso .task-check { color: var(--warn); }
+.task.est-hecha .task-check { color: var(--ok); }
+.task-body { min-width: 0; flex: 1; }
+.task-t { font-size: 13.5px; font-weight: 500; line-height: 1.35; overflow-wrap: anywhere; }
+.task.est-hecha .task-t { text-decoration: line-through; text-decoration-thickness: 1px; color: var(--text-3); }
+.task-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+.task-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--text-2); background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 1px 7px; }
+.task-chip.faint { background: transparent; border: 0; color: var(--text-3); font-weight: 500; padding: 1px 0; }
+.task-chip.bad { color: var(--danger); background: var(--danger-soft); border-color: transparent; }
+.task.note { background: transparent; border: 0; padding: 3px 0; align-items: center; }
+.task.note .task-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-strong); flex: none; margin: 0 6px 0 7px; }
+.task.note .task-t { font-weight: 400; color: var(--text-2); font-size: 13px; }
+
+/* ===== Certificado emitido ===== */
+.cert-card { border: 1px solid var(--ok); background: var(--ok-soft); border-radius: 13px; padding: 14px; }
+.cert-top { display: flex; align-items: center; gap: 11px; }
+.cert-ic { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; background: var(--ok); color: #fff; flex: none; }
+.cert-ttl { min-width: 0; flex: 1; }
+.cert-ttl b { display: block; font-family: var(--ff-d); font-size: 15px; letter-spacing: -.01em; }
+.cert-ttl span { font-size: 12px; color: var(--text-2); }
+.cert-rows { margin-top: 12px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--ok) 30%, transparent); }

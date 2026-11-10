@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { DB, OrdenServicio, Equipo, Usuario, Cliente } from './types'
+import type { DB, OrdenServicio, Equipo, Usuario, Cliente, AccionOS, CertificadoEmitido } from './types'
 import { buildSeed } from './seed'
 import { vigencia } from './format'
 
@@ -12,7 +12,7 @@ function loadDB(): DB {
     const raw = localStorage.getItem(DB_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as DB
-      if (parsed.version === 4) return parsed
+      if (parsed.version === 5) return parsed
     }
   } catch { /* ignore */ }
   const seed = buildSeed()
@@ -33,6 +33,9 @@ interface Store {
   addOrden: (o: Omit<OrdenServicio, 'id' | 'numero' | 'acciones' | 'aperturaISO' | 'cierreISO' | 'fotos' | 'firmaDataUrl' | 'firmante'> & Partial<OrdenServicio>) => OrdenServicio
   updateOrden: (id: number, patch: Partial<OrdenServicio>) => void
   addAccion: (ordenId: number, nota: string) => void
+  addTarea: (ordenId: number, data: { nota: string; responsable?: string; venceISO?: string }) => void
+  updateAccion: (ordenId: number, accionId: number, patch: Partial<AccionOS>) => void
+  emitirCertificado: (ordenId: number, equipoId: number, data: { numero: string; meses: number; firmaDataUrl?: string; firmante?: string; norma?: string }) => CertificadoEmitido
   updateEquipo: (id: number, patch: Partial<Equipo>) => void
   generarPlan: (clienteId: number) => number
   log: (accion: string, detalle: string) => void
@@ -126,6 +129,47 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     log('Agregó acción', nota)
   }, [user, log])
 
+  const addTarea = useCallback((ordenId: number, data: { nota: string; responsable?: string; venceISO?: string }) => {
+    setDb((d) => ({
+      ...d,
+      ordenes: d.ordenes.map((o) =>
+        o.id === ordenId
+          ? { ...o, acciones: [...o.acciones, { id: Math.max(0, ...o.acciones.map((a) => a.id)) + 1, fechaISO: new Date().toISOString(), usuario: user?.username ?? 'sistema', nota: data.nota, tipo: 'tarea', estado: 'pendiente', responsable: data.responsable, venceISO: data.venceISO }] }
+          : o,
+      ),
+    }))
+    log('Creó tarea', data.nota)
+  }, [user, log])
+
+  const updateAccion = useCallback((ordenId: number, accionId: number, patch: Partial<AccionOS>) => {
+    setDb((d) => ({
+      ...d,
+      ordenes: d.ordenes.map((o) =>
+        o.id === ordenId ? { ...o, acciones: o.acciones.map((a) => (a.id === accionId ? { ...a, ...patch } : a)) } : o,
+      ),
+    }))
+  }, [])
+
+  const emitirCertificado = useCallback((ordenId: number, equipoId: number, data: { numero: string; meses: number; firmaDataUrl?: string; firmante?: string; norma?: string }) => {
+    const now = new Date()
+    const venc = new Date(now); venc.setMonth(venc.getMonth() + data.meses)
+    const cert: CertificadoEmitido = { numero: data.numero, norma: data.norma ?? 'IEC 62353', fechaISO: now.toISOString(), vencimientoISO: venc.toISOString(), firmaDataUrl: data.firmaDataUrl, firmante: data.firmante }
+    setDb((d) => {
+      const existe = d.certificaciones.find((c) => c.equipoId === equipoId)
+      const certificaciones = existe
+        ? d.certificaciones.map((c) => (c.id === existe.id ? { ...c, numero: data.numero, fechaISO: cert.fechaISO, vencimientoISO: cert.vencimientoISO } : c))
+        : [...d.certificaciones, { id: Math.max(0, ...d.certificaciones.map((x) => x.id)) + 1, equipoId, tipo: 'Seguridad eléctrica' as const, numero: data.numero, fechaISO: cert.fechaISO, vencimientoISO: cert.vencimientoISO }]
+      const ordenes = d.ordenes.map((o) =>
+        o.id === ordenId
+          ? { ...o, certificado: cert, acciones: [...o.acciones, { id: Math.max(0, ...o.acciones.map((a) => a.id)) + 1, fechaISO: cert.fechaISO, usuario: user?.username ?? 'sistema', nota: `Certificado emitido N° ${data.numero} · vigente hasta ${cert.vencimientoISO.slice(0, 10)}`, tipo: 'nota' as const }] }
+          : o,
+      )
+      return { ...d, certificaciones, ordenes }
+    })
+    log('Emitió certificado', `N° ${data.numero} · equipo #${equipoId} · vence ${cert.vencimientoISO.slice(0, 10)}`)
+    return cert
+  }, [user, log])
+
   const updateEquipo = useCallback((id: number, patch: Partial<Equipo>) => {
     setDb((d) => ({ ...d, equipos: d.equipos.map((e) => (e.id === id ? { ...e, ...patch } : e)) }))
   }, [])
@@ -176,7 +220,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const value: Store = {
     db, user, cliente, clientesVisibles,
     login, logout, setCliente, resetDemo,
-    addOrden, updateOrden, addAccion, updateEquipo, generarPlan, log,
+    addOrden, updateOrden, addAccion, addTarea, updateAccion, emitirCertificado, updateEquipo, generarPlan, log,
   }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

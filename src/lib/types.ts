@@ -79,11 +79,26 @@ export interface Mantenimiento {
 export type TipoOS = 'Reparación' | 'Mantenimiento preventivo' | 'Certificación' | 'Instalación' | 'Provisión'
 export type SituacionOS = 'Abierta' | 'En taller' | 'Esperando repuesto' | 'Presupuestar' | 'Lista' | 'Cerrada'
 
+export type EstadoTarea = 'pendiente' | 'en_curso' | 'hecha'
+
 export interface AccionOS {
   id: number
   fechaISO: string
   usuario: string
   nota: string
+  tipo?: 'tarea' | 'nota'   // 'tarea' = tarea con estado; ausente/'nota' = registro de bitácora
+  estado?: EstadoTarea      // sólo para tareas
+  responsable?: string      // técnico asignado (sólo tareas)
+  venceISO?: string         // fecha límite (sólo tareas)
+}
+
+export interface CertificadoEmitido {
+  numero: string
+  norma: string
+  fechaISO: string
+  vencimientoISO: string
+  firmaDataUrl?: string
+  firmante?: string
 }
 
 export interface OrdenServicio {
@@ -108,6 +123,7 @@ export interface OrdenServicio {
   firmante?: string
   origen?: 'Interna' | 'Portal'
   protocolo?: Protocolo
+  certificado?: CertificadoEmitido
   programadaISO?: string
 }
 
