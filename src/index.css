@@ -230,6 +230,7 @@ table.tbl { width: 100%; border-collapse: collapse; }
 @keyframes slidein { from { transform: translateX(24px); opacity: .6; } to { transform: translateX(0); opacity: 1; } }
 .drawer-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 18px 20px; border-bottom: 1px solid var(--border); }
 .drawer-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 18px; }
+.drawer-body > * { flex-shrink: 0; }
 .drawer-foot { border-top: 1px solid var(--border); padding: 14px 20px; display: flex; gap: 10px; justify-content: flex-end; }
 .modal { position: fixed; inset: 0; display: grid; place-items: center; z-index: 61; padding: 16px; }
 .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); width: min(520px, 100%); max-height: 90vh; overflow-y: auto; animation: pop .16s ease; }
@@ -366,7 +367,7 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .mcard:hover { box-shadow: var(--shadow); border-color: var(--border-strong); }
 .mcard:active { transform: scale(.985); }
 .mcard .mc-body { min-width: 0; }
-.mcard .mc-title { font-weight: 650; font-size: 14px; letter-spacing: -.01em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; }
+.mcard .mc-title { font-weight: 650; font-size: 14px; letter-spacing: -.01em; line-height: 1.3; overflow-wrap: anywhere; }
 .mcard .mc-sub { color: var(--text-2); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
 .mcard .mc-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
 .mcard .mc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; text-align: right; }
@@ -378,12 +379,12 @@ table.tbl { width: 100%; border-collapse: collapse; }
 @media (prefers-reduced-motion: reduce) { .stagger > *, .mcard { animation: none !important; } }
 
 /* ===== Hero / tarjetas de detalle v3 ===== */
-.hero { border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center; position: relative; overflow: hidden; color: #fff; background: linear-gradient(135deg, var(--h1,#0a3f52), var(--h2,#0e7490) 55%, var(--h3,#15a6c4)); box-shadow: var(--shadow); }
+.hero { flex: none; border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center; position: relative; overflow: hidden; color: #fff; background: linear-gradient(135deg, var(--h1,#0a3f52), var(--h2,#0e7490) 55%, var(--h3,#15a6c4)); box-shadow: var(--shadow); }
 .hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(420px 180px at 90% -20%, rgba(255,255,255,.18), transparent 60%); pointer-events: none; }
 .hero .h-ic { width: 54px; height: 54px; border-radius: 14px; background: rgba(255,255,255,.16); display: grid; place-items: center; flex: none; backdrop-filter: blur(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
 .hero .h-body { min-width: 0; position: relative; z-index: 1; }
 .hero .h-kicker { font-family: var(--ff-m); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
-.hero .h-title { font-family: var(--ff-d); font-weight: 800; font-size: 19px; line-height: 1.1; letter-spacing: -.02em; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hero .h-title { font-family: var(--ff-d); font-weight: 800; font-size: 19px; line-height: 1.12; letter-spacing: -.02em; margin-top: 2px; overflow-wrap: anywhere; }
 .hero .h-sub { font-size: 13px; opacity: .9; margin-top: 3px; }
 .hero.ht-ok { --h1:#0b5f33; --h2:#13893f; --h3:#2bbf6a; }
 .hero.ht-warn { --h1:#8a5406; --h2:#bf7408; --h3:#e0a23d; }
