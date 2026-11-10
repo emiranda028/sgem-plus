@@ -108,7 +108,7 @@ function Vencimientos({ clienteId }: { clienteId: number }) {
           <span style={{ fontWeight: 500 }}>{generadas ? `Se generaron ${generadas} órdenes automáticas para los vencimientos próximos.` : 'No hay vencimientos nuevos para generar: ya tienen una orden abierta.'}</span>
         </div>
       )}
-      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+      <div className="kpi-row kpi-3">
         <Kpi label="Total a atender" value={alertas.length} tone="warn" icon={<CalendarClock size={18} />} hint={`${vencidos} ya vencidos`} />
         <Kpi label="Certificaciones" value={cert} tone="info" icon={<ShieldCheck size={18} />} />
         <Kpi label="Mantenimientos" value={mp} tone="accent" icon={<CalendarClock size={18} />} />

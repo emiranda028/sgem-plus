@@ -23,7 +23,7 @@ function Taller({ clienteId }: { clienteId: number }) {
 
   return (
     <Page title="Equipos en taller" sub={cliente?.nombre}>
-      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+      <div className="kpi-row kpi-3">
         <Kpi label="En taller" value={rows.length} tone="info" icon={<Wrench size={18} />} />
         <Kpi label="Más de 100 días" value={criticos} tone={criticos ? 'danger' : 'neutral'} />
         <Kpi label="Promedio de días" value={prom} tone="warn" />

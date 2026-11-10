@@ -3,7 +3,7 @@ import {
   Boxes, ClipboardList, LayoutDashboard, LogOut, Moon, Settings2, Stethoscope,
   Sun, Wrench, CalendarClock, Building2, ScrollText, QrCode, Bell, CalendarDays, BarChart3,
 } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import ClientPicker from './ClientPicker'
 import AlertsBell from './AlertsBell'
 import { ROLE_LABEL, useAlertas, useStore } from '../lib/store'
@@ -100,6 +100,7 @@ export default function Layout() {
             <button className="icon-btn" onClick={toggle} title="Tema" aria-label="Cambiar tema">
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
+            <UserMenu />
           </div>
         </header>
         <main className="content"><Outlet /></main>
@@ -113,6 +114,38 @@ export default function Layout() {
           </NavLink>
         ))}
       </nav>
+    </div>
+  )
+}
+
+function UserMenu() {
+  const { user, logout } = useStore()
+  const { theme, toggle } = useTheme()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const close = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [open])
+  return (
+    <div className="usermenu only-mobile" ref={ref}>
+      <button className="umbtn" onClick={() => setOpen((o) => !o)} aria-label="Menú de usuario">
+        <span className="av" style={{ background: user?.color }}>{initials(`${user?.nombre} ${user?.apellido}`)}</span>
+      </button>
+      {open && (
+        <div className="umpop">
+          <div className="umhead">
+            <span className="av" style={{ background: user?.color, width: 36, height: 36 }}>{initials(`${user?.nombre} ${user?.apellido}`)}</span>
+            <div><b>{user?.nombre} {user?.apellido}</b><span>{user ? ROLE_LABEL[user.rol] : ''}</span></div>
+          </div>
+          <button className="umitem" onClick={() => { toggle(); setOpen(false) }}>
+            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />} {theme === 'dark' ? 'Tema claro' : 'Tema oscuro'}
+          </button>
+          <button className="umitem danger" onClick={logout}><LogOut size={17} /> Cerrar sesión</button>
+        </div>
+      )}
     </div>
   )
 }

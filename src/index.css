@@ -391,3 +391,28 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .svc-card .sc-bar { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; align-items: center; font-size: 12px; }
 .svc-card .sc-bar .lbl { color: var(--text-2); }
 .svc-card .sc-bar .val { font-variant-numeric: tabular-nums; color: var(--text-2); white-space: nowrap; }
+
+/* ===== Fixes mobile v3.1 ===== */
+.kpi-3 { grid-template-columns: repeat(3, 1fr); }
+.only-mobile { display: none; }
+
+/* Menú de usuario (topbar) */
+.usermenu { position: relative; }
+.usermenu .umbtn { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 6px 0 6px; border-radius: 10px; }
+.usermenu .umbtn:hover { background: var(--surface-3); }
+.usermenu .av { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 11px; font-family: var(--ff-d); }
+.usermenu .umpop { position: absolute; top: calc(100% + 8px); right: 0; width: 240px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 8px; z-index: 50; animation: pop .13s ease; }
+.usermenu .umhead { display: flex; align-items: center; gap: 10px; padding: 8px 8px 10px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+.usermenu .umhead b { display: block; font-size: 13px; }
+.usermenu .umhead span { font-size: 11px; color: var(--text-3); }
+.usermenu .umitem { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 10px; border-radius: 9px; font-size: 13.5px; font-weight: 500; color: var(--text-2); }
+.usermenu .umitem:hover { background: var(--surface-3); color: var(--text); }
+.usermenu .umitem.danger:hover { background: var(--danger-soft); color: var(--danger); }
+
+@media (max-width: 760px) {
+  .kpi-3 { grid-template-columns: repeat(2, 1fr); }
+  .only-mobile { display: initial; }
+  /* popovers anclados al viewport para no desbordar */
+  .cpick .popover, .bell .popover { position: fixed; left: 12px; right: 12px; top: 64px; width: auto; max-width: none; }
+  .usermenu .umpop { position: fixed; right: 12px; left: auto; top: 64px; width: 220px; }
+}
