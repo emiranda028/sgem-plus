@@ -117,7 +117,7 @@ function Notificaciones({ clienteId }: { clienteId: number }) {
         <div className="card-head"><h3>Historial de envíos</h3><span className="faint small">{historial.length}</span></div>
         {historial.length === 0 ? <EmptyState icon={<Mail size={22} />}>Todavía no se enviaron notificaciones.</EmptyState> : (
           <div className="tbl-wrap">
-            <table className="tbl"><tbody>
+            <table className="tbl cards"><tbody>
               {historial.map((h) => (
                 <tr key={h.id} style={{ cursor: 'default' }}>
                   <td className="mono small faint" style={{ whiteSpace: 'nowrap' }}>{fecha(h.fechaISO)} {new Date(h.fechaISO).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</td>

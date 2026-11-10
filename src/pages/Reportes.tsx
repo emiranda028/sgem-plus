@@ -92,7 +92,7 @@ function Reportes({ clienteId }: { clienteId: number }) {
           {r.topEquipos.map((e) => {
             const max = Math.max(1, ...r.topEquipos.map((x) => x.value))
             return (
-              <div key={e.name} style={{ display: 'grid', gridTemplateColumns: '200px 1fr 36px', gap: 12, alignItems: 'center' }}>
+              <div key={e.name} style={{ display: 'grid', gridTemplateColumns: 'minmax(100px, 190px) 1fr 34px', gap: 12, alignItems: 'center' }}>
                 <span style={{ fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.name}</span>
                 <div style={{ height: 8, background: 'var(--surface-3)', borderRadius: 99 }}><div style={{ width: `${(e.value / max) * 100}%`, height: '100%', background: 'var(--brand)', borderRadius: 99 }} /></div>
                 <span className="mono" style={{ fontWeight: 600, textAlign: 'right' }}>{e.value}</span>

@@ -5,7 +5,7 @@ import { addDays, eachDayOfInterval, format, isSameDay, startOfWeek } from 'date
 import { es } from 'date-fns/locale'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
-import { Badge, EmptyState } from '../components/ui'
+import { Badge, EmptyState, IconTile, iconOS, useIsMobile } from '../components/ui'
 import { useStore } from '../lib/store'
 import { NOW } from '../lib/format'
 import type { OrdenServicio } from '../lib/types'
@@ -25,6 +25,7 @@ function Agenda({ clienteId }: { clienteId: number }) {
   const tecnicos = useMemo(() => [...new Set(programadas.map((o) => o.tecnico))].sort(), [programadas])
   const colorDe = (t: string) => COLORS[Math.max(0, tecnicos.indexOf(t)) % COLORS.length]
   const dias = useMemo(() => eachDayOfInterval({ start: cursor, end: addDays(cursor, 6) }), [cursor])
+  const isMobile = useIsMobile()
   const delDia = (d: Date) => programadas.filter((o) => o.programadaISO && isSameDay(new Date(o.programadaISO), d) && (!tecFiltro || o.tecnico === tecFiltro))
 
   return (
@@ -48,6 +49,34 @@ function Agenda({ clienteId }: { clienteId: number }) {
           {tecnicos.map((t) => <span key={t} className="chip" style={{ borderColor: colorDe(t) }}><span style={{ width: 8, height: 8, borderRadius: 2, background: colorDe(t), display: 'inline-block' }} /> {t}</span>)}
         </div>
       )}
+      {isMobile ? (
+        <div className="stagger" style={{ display: 'grid', gap: 10 }}>
+          {dias.map((d) => {
+            const items = delDia(d)
+            const hoy = isSameDay(d, NOW)
+            if (items.length === 0 && !hoy) return null
+            return (
+              <div key={d.toISOString()} className={`ag-day ${hoy ? 'today' : ''}`}>
+                <div className="ag-h">
+                  <span className="d-num">{format(d, 'd')}</span>
+                  <span className="d-dow">{format(d, 'EEEE', { locale: es })}</span>
+                  <span className="d-count"><Badge tone={items.length ? 'brand' : 'neutral'}>{items.length} visita{items.length === 1 ? '' : 's'}</Badge></span>
+                </div>
+                {items.length > 0 && (
+                  <div className="ag-body">
+                    {items.map((o: OrdenServicio) => (
+                      <button key={o.id} className="ag-item" style={{ borderLeftColor: colorDe(o.tecnico) }} onClick={() => nav('/ordenes')}>
+                        <IconTile icon={iconOS(o.tipo)} tone="brand" size={34} />
+                        <div className="ai-body"><div className="ai-t">{o.titulo}</div><div className="ai-s">{o.tecnico} · {o.taller}</div></div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      ) : (
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(150px, 1fr))', gap: 10, overflowX: 'auto' }}>
         {dias.map((d) => {
           const items = delDia(d)
@@ -71,6 +100,7 @@ function Agenda({ clienteId }: { clienteId: number }) {
           )
         })}
       </div>
+      )}
       {programadas.length === 0 && (
         <div className="card"><EmptyState icon={<CalendarDays size={22} />}>No hay visitas programadas. Programá una desde el detalle de una orden.</EmptyState></div>
       )}

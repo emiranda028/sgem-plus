@@ -416,3 +416,25 @@ table.tbl { width: 100%; border-collapse: collapse; }
   .cpick .popover, .bell .popover { position: fixed; left: 12px; right: 12px; top: 64px; width: auto; max-width: none; }
   .usermenu .umpop { position: fixed; right: 12px; left: auto; top: 64px; width: 220px; }
 }
+
+/* ===== Mobile pass páginas ===== */
+.cfg-grid { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 760px) {
+  .cfg-grid { grid-template-columns: 1fr; }
+  .cfg-grid .card.pad:first-child { display: flex !important; overflow-x: auto; gap: 6px !important; }
+  .cfg-grid .card.pad:first-child button { white-space: nowrap; }
+}
+
+/* Agenda mobile: lista por día */
+.ag-day { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; box-shadow: var(--shadow-sm); overflow: hidden; }
+.ag-day .ag-h { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: var(--surface-2); border-bottom: 1px solid var(--border); }
+.ag-day.today .ag-h { background: var(--brand-soft); }
+.ag-day .ag-h .d-num { font-family: var(--ff-d); font-weight: 800; font-size: 18px; }
+.ag-day.today .ag-h .d-num { color: var(--brand); }
+.ag-day .ag-h .d-dow { font-size: 12px; color: var(--text-2); text-transform: capitalize; }
+.ag-day .ag-h .d-count { margin-left: auto; }
+.ag-day .ag-body { padding: 8px; display: grid; gap: 6px; }
+.ag-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 9px; border: 1px solid var(--border); border-left: 3px solid var(--acc, var(--brand)); background: var(--surface); text-align: left; width: 100%; }
+.ag-item .ai-body { min-width: 0; flex: 1; }
+.ag-item .ai-t { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ag-item .ai-s { font-size: 11.5px; color: var(--text-2); }

@@ -10,7 +10,7 @@ export default function Auditoria() {
       <div className="card">
         {db.auditoria.length === 0 ? <EmptyState /> : (
           <div className="tbl-wrap">
-            <table className="tbl">
+            <table className="tbl cards">
               <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead>
               <tbody>
                 {db.auditoria.map((a) => (

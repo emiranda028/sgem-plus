@@ -27,7 +27,7 @@ export default function Configuracion() {
   return (
     <Page title="Configuración" sub="Catálogos, usuarios y datos de demostración"
       actions={<button className="btn secondary" onClick={() => resetDemo()}><RotateCcw size={16} /> Restablecer demo</button>}>
-      <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20, alignItems: 'start' }} className="cfg-grid">
+      <div className="cfg-grid">
         <div className="card pad" style={{ display: 'grid', gap: 2 }}>
           {CATS.map((c) => (
             <button key={c.key} className="nav-item" onClick={() => setCat(c.key)}
@@ -40,7 +40,7 @@ export default function Configuracion() {
           <div className="card-head"><h3>{CATS.find((c) => c.key === cat)?.label}</h3><span className="faint small">{data.length} registros</span></div>
           {data.length === 0 ? <EmptyState /> : (
             <div className="tbl-wrap">
-              <table className="tbl">
+              <table className="tbl cards">
                 <tbody>
                   {data.map((r, i) => (
                     <tr key={i} style={{ cursor: 'default' }}>
