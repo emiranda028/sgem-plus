@@ -1,6 +1,7 @@
 import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import {
-  Activity, AlertTriangle, Baby, BedDouble, ClipboardList, FlaskConical, Gauge, HeartPulse,
+  Activity, AlertTriangle, Baby, BedDouble, ChevronRight, ClipboardList, FlaskConical, Gauge, HeartPulse,
   Inbox, Package, PackagePlus, Radiation, ScanLine, Stethoscope, Syringe, Wind, Wrench, Zap, ShieldCheck, CalendarClock,
 } from 'lucide-react'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
@@ -69,17 +70,19 @@ export function Badge({ children, tone = 'neutral', dot }: { children: ReactNode
   )
 }
 
-export function Kpi({ label, value, hint, tone = 'brand', icon }: { label: string; value: ReactNode; hint?: ReactNode; tone?: Tone; icon?: ReactNode }) {
-  return (
-    <div className={`kpi tone-${tone}`}>
+export function Kpi({ label, value, hint, tone = 'brand', icon, to }: { label: string; value: ReactNode; hint?: ReactNode; tone?: Tone; icon?: ReactNode; to?: string }) {
+  const inner = (
+    <>
       <div className="top">
         <span className="lbl">{label}</span>
         {icon && <span className="ic">{icon}</span>}
       </div>
       <div className="val mono">{value}</div>
-      {hint && <div className="hint">{hint}</div>}
-    </div>
+      {hint && <div className="hint">{hint}{to && <ChevronRight size={13} className="kpi-go" />}</div>}
+    </>
   )
+  const cls = `kpi tone-${tone}${to ? ' kpi-link' : ''}`
+  return to ? <Link to={to} className={cls}>{inner}</Link> : <div className={cls}>{inner}</div>
 }
 
 export function Progress({ value, tone = 'brand' }: { value: number; tone?: Tone }) {

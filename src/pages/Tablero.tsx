@@ -59,10 +59,10 @@ function Tab({ clienteId }: { clienteId: number }) {
   return (
     <Page title="Tablero" sub={cliente?.nombre}>
       <div className="kpi-row">
-        <Kpi label="Equipos activos" value={d.equipos.length} tone="brand" icon={<Stethoscope size={18} />} hint={`${d.enTaller.length} en taller ahora`} />
-        <Kpi label="Certificaciones vigentes" value={`${pct(d.cert.ok, d.cert.total)}%`} tone="ok" icon={<BadgeCheck size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.cert.ven} vencidas · {d.cert.pv} por vencer</span>} />
-        <Kpi label="Preventivos vigentes" value={`${pct(d.mp.ok, d.mp.total)}%`} tone="warn" icon={<CalendarClock size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.mp.ven} vencidos</span>} />
-        <Kpi label="En taller" value={d.enTaller.length} tone={d.enTaller.length ? 'danger' : 'neutral'} icon={<Wrench size={18} />} hint="Ver detalle en Taller" />
+        <Kpi label="Equipos activos" value={d.equipos.length} tone="brand" icon={<Stethoscope size={18} />} hint={`${d.enTaller.length} en taller ahora`} to="/equipos" />
+        <Kpi label="Certificaciones vigentes" value={`${pct(d.cert.ok, d.cert.total)}%`} tone="ok" icon={<BadgeCheck size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.cert.ven} vencidas · {d.cert.pv} por vencer</span>} to="/vencimientos" />
+        <Kpi label="Preventivos vigentes" value={`${pct(d.mp.ok, d.mp.total)}%`} tone="warn" icon={<CalendarClock size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.mp.ven} vencidos</span>} to="/vencimientos" />
+        <Kpi label="En taller" value={d.enTaller.length} tone={d.enTaller.length ? 'danger' : 'neutral'} icon={<Wrench size={18} />} hint="Ver detalle en Taller" to="/taller" />
       </div>
 
       <div className="grid-dash">
