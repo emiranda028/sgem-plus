@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { Area, AreaChart, LabelList, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import { BadgeCheck, CalendarClock, Stethoscope, Wrench } from 'lucide-react'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
@@ -120,12 +120,14 @@ function Tab({ clienteId }: { clienteId: number }) {
           </div>
           <div className="card pad">
             <h3 style={{ fontSize: 15, marginBottom: 6 }}>Órdenes por mes</h3>
-            <ResponsiveContainer width="100%" height={120}>
-              <AreaChart data={d.meses} margin={{ top: 6, right: 4, left: 4, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={140}>
+              <AreaChart data={d.meses} margin={{ top: 22, right: 10, left: 10, bottom: 0 }}>
                 <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--brand)" stopOpacity={0.35} /><stop offset="100%" stopColor="var(--brand)" stopOpacity={0} /></linearGradient></defs>
                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-3)' }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12 }} />
-                <Area type="monotone" dataKey="value" stroke="var(--brand)" strokeWidth={2} fill="url(#g)" />
+                <Tooltip formatter={(v: number) => [`${v} órdenes`, '']} contentStyle={{ borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12 }} />
+                <Area type="monotone" dataKey="value" stroke="var(--brand)" strokeWidth={2} fill="url(#g)" dot={{ r: 3, fill: 'var(--brand)', strokeWidth: 0 }}>
+                  <LabelList dataKey="value" position="top" offset={10} style={{ fontSize: 12, fontWeight: 700, fill: 'var(--text)' }} />
+                </Area>
               </AreaChart>
             </ResponsiveContainer>
           </div>
