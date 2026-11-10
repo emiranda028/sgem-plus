@@ -30,7 +30,8 @@ export default function Configuracion() {
       <div className="cfg-grid">
         <div className="card pad" style={{ display: 'grid', gap: 2 }}>
           {CATS.map((c) => (
-            <button key={c.key} className="nav-item" onClick={() => setCat(c.key)}
+            <button key={c.key} className={`nav-item ${cat === c.key ? 'on' : ''}`} onClick={() => setCat(c.key)}
+              ref={cat === c.key ? (el) => el?.scrollIntoView({ block: 'nearest', inline: 'center' }) : undefined}
               style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 9, fontWeight: 600, fontSize: 13.5, background: cat === c.key ? 'var(--brand-soft)' : 'transparent', color: cat === c.key ? 'var(--brand)' : 'var(--text-2)' }}>
               {c.label}
             </button>

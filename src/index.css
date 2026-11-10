@@ -76,6 +76,8 @@
 
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; }
+html, body { overflow-x: hidden; max-width: 100%; }
+#root { overflow-x: hidden; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
   font-family: var(--ff); font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased;
@@ -288,10 +290,16 @@ table.tbl { width: 100%; border-collapse: collapse; }
   .drawer { width: 100vw; }
   .tbl.cards thead { display: none; }
   .tbl.cards, .tbl.cards tbody, .tbl.cards tr, .tbl.cards td { display: block; width: 100%; }
-  .tbl.cards tr { padding: 12px 14px; border-bottom: 1px solid var(--border); }
-  .tbl.cards td { border: 0; padding: 3px 0; display: flex; justify-content: space-between; gap: 12px; text-align: right; }
-  .tbl.cards td::before { content: attr(data-label); color: var(--text-3); font-size: 12px; text-align: left; font-weight: 500; }
-  .tbl.cards td:first-child { padding-bottom: 6px; }
+  .tbl.cards tr { padding: 13px 15px; border-bottom: 1px solid var(--border); }
+  .tbl.cards tr:last-child { border-bottom: 0; }
+  /* Celdas con etiqueta: fila tipo ficha "etiqueta ....... valor" */
+  .tbl.cards td { border: 0; padding: 3px 0; display: flex; justify-content: space-between; align-items: baseline; gap: 14px; text-align: right; min-width: 0; }
+  .tbl.cards td::before { content: attr(data-label); color: var(--text-3); font-size: 12px; text-align: left; font-weight: 500; flex: none; }
+  /* Celdas sin etiqueta: alineadas a la izquierda, apiladas (evita el zigzag) */
+  .tbl.cards td:not([data-label]) { justify-content: flex-start; text-align: left; }
+  .tbl.cards td:not([data-label])::before { display: none; }
+  .tbl.cards td.row-strong { font-size: 15px; font-weight: 650; letter-spacing: -.01em; }
+  .tbl.cards td:first-child { padding-bottom: 5px; }
   .tbl.cards td:first-child::before { content: none; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
@@ -421,8 +429,10 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .cfg-grid { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
 @media (max-width: 760px) {
   .cfg-grid { grid-template-columns: 1fr; }
-  .cfg-grid .card.pad:first-child { display: flex !important; overflow-x: auto; gap: 6px !important; }
-  .cfg-grid .card.pad:first-child button { white-space: nowrap; }
+  .cfg-grid .card.pad:first-child { display: flex !important; overflow-x: auto; gap: 7px !important; padding: 8px !important; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .cfg-grid .card.pad:first-child::-webkit-scrollbar { display: none; }
+  .cfg-grid .card.pad:first-child button { white-space: nowrap; flex: none; scroll-snap-align: start; border: 1px solid var(--border); }
+  .cfg-grid .card.pad:first-child button.on { border-color: var(--brand); }
 }
 
 /* Agenda mobile: lista por día */
