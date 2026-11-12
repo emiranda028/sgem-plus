@@ -11,9 +11,9 @@
   --surface-3: #eef0f3;
   --border: #e5e6ea;
   --border-strong: #d2d4da;
-  --text: #0c0c0d;
-  --text-2: #55565e;
-  --text-3: #8d8f99;
+  --text: #0b0b0d;
+  --text-2: #4b4d56;
+  --text-3: #70727e;
   --brand: #1b39c4;
   --brand-2: #16309f;
   --brand-3: #3350d8;
@@ -43,30 +43,30 @@
   color-scheme: light;
 }
 [data-theme="dark"] {
-  --bg: #0b0c0f;
-  --bg-tint: #0e1014;
-  --surface: #15171d;
-  --surface-2: #1b1e25;
-  --surface-3: #22262f;
-  --border: #272b34;
-  --border-strong: #363b46;
-  --text: #ededf0;
-  --text-2: #9a9ca6;
-  --text-3: #686b76;
-  --brand: #6c82ef;
-  --brand-2: #5569e6;
-  --brand-3: #8698f3;
-  --brand-soft: #1a2142;
-  --signal: #6c82ef;
-  --signal-soft: #1a2142;
-  --ok: #46b97e;
-  --ok-soft: #10281d;
-  --warn: #e0894a;
-  --warn-soft: #2a1d12;
-  --danger: #e5635b;
-  --danger-soft: #2e1514;
-  --info: #6c82ef;
-  --info-soft: #1a2142;
+  --bg: #0a0d13;
+  --bg-tint: #0d111a;
+  --surface: #141a24;
+  --surface-2: #1a212d;
+  --surface-3: #212a38;
+  --border: #283244;
+  --border-strong: #39475f;
+  --text: #eaeff7;
+  --text-2: #a3b1c5;
+  --text-3: #74818f;
+  --brand: #45a6f2;
+  --brand-2: #2d8ad8;
+  --brand-3: #6fbdf8;
+  --brand-soft: #0f2b44;
+  --signal: #45a6f2;
+  --signal-soft: #0f2b44;
+  --ok: #43c489;
+  --ok-soft: #0f2a1f;
+  --warn: #e3a44c;
+  --warn-soft: #2a2112;
+  --danger: #ec6a60;
+  --danger-soft: #2f1715;
+  --info: #45a6f2;
+  --info-soft: #0f2b44;
   --shadow-sm: 0 1px 1px rgba(0,0,0,.3);
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -16px rgba(0,0,0,.65);
   --shadow-lg: 0 22px 52px -22px rgba(0,0,0,.8);
@@ -80,8 +80,8 @@ html, body { overflow-x: hidden; max-width: 100%; }
 #root { overflow-x: hidden; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
-  font-family: var(--ff); font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased;
-  font-synthesis: none;
+  font-family: var(--ff); font-size: 14.5px; line-height: 1.52; -webkit-font-smoothing: antialiased;
+  font-synthesis: none; letter-spacing: -.005em;
   background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 48px 48px;
 }
