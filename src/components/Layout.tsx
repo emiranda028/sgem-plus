@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import {
   Boxes, ClipboardList, LayoutDashboard, LogOut, Moon, Settings2, Stethoscope,
   Sun, Wrench, CalendarClock, Building2, ScrollText, QrCode, Bell, CalendarDays, BarChart3,
@@ -60,10 +60,10 @@ export default function Layout() {
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="brand">
+        <Link to={esCliente ? '/portal' : '/'} className="brand" title="Ir al inicio">
           <span className="mark"><Boxes size={22} /></span>
           <div><b>SGEM</b><small>Plus</small></div>
-        </div>
+        </Link>
         <nav className="nav">
           {groups.map((g) => (
             <div key={g.label}>
@@ -90,7 +90,7 @@ export default function Layout() {
 
       <div className="main">
         <header className="topbar">
-          <div className="brand-mobile"><span className="mark"><Boxes size={18} /></span> <span className="bm-name">SGEM</span></div>
+          <Link to={esCliente ? '/portal' : '/'} className="brand-mobile" title="Ir al inicio"><span className="mark"><Boxes size={18} /></span> <span className="bm-name">SGEM</span></Link>
           {!esCliente && <ClientPicker />}
           {esCliente && cliente && (
             <span className="chip on"><Building2 size={15} /> {cliente.nombre}</span>
