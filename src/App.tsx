@@ -15,6 +15,7 @@ const Etiquetas = lazy(() => import('./pages/Etiquetas'))
 const Notificaciones = lazy(() => import('./pages/Notificaciones'))
 const Agenda = lazy(() => import('./pages/Agenda'))
 const Reportes = lazy(() => import('./pages/Reportes'))
+const Comparativa = lazy(() => import('./pages/Comparativa'))
 const Portal = lazy(() => import('./pages/Portal'))
 const Auditoria = lazy(() => import('./pages/Auditoria'))
 const Configuracion = lazy(() => import('./pages/Configuracion'))
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="taller" element={<Staff><Taller /></Staff>} />
         <Route path="agenda" element={<Staff><Agenda /></Staff>} />
         <Route path="reportes" element={<Staff><Reportes /></Staff>} />
+        <Route path="comparativa" element={<Staff><Comparativa /></Staff>} />
         <Route path="etiquetas" element={<Staff><Etiquetas /></Staff>} />
         <Route path="vencimientos" element={<Suspense fallback={<Load />}><Vencimientos /></Suspense>} />
         <Route path="notificaciones" element={<Staff><Notificaciones /></Staff>} />

@@ -531,3 +531,7 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .selbar-link:hover { color: var(--text); }
 .selbar-sp { flex: 1; min-width: 8px; }
 @media (max-width: 760px) { .selbar { bottom: calc(66px + env(safe-area-inset-bottom)); } }
+
+/* Acceso "comparar todos" en el selector de cliente */
+.cpick-compare { display: flex; align-items: center; gap: 8px; padding: 9px 11px; border-radius: 9px; font-size: 13px; font-weight: 600; color: var(--brand); background: var(--brand-soft); margin-bottom: 8px; }
+.cpick-compare:hover { background: color-mix(in srgb, var(--brand) 16%, var(--surface)); }

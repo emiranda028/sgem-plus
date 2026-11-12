@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Building2, Check, ChevronsUpDown, Search } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Building2, Check, ChevronsUpDown, Scale, Search } from 'lucide-react'
 import { useStore } from '../lib/store'
 import { initials, normalize } from '../lib/format'
 import type { Cliente } from '../lib/types'
@@ -54,6 +55,7 @@ export default function ClientPicker() {
       </button>
       {open && (
         <div className="popover">
+          <Link to="/comparativa" className="cpick-compare" onClick={() => setOpen(false)}><Scale size={15} /> Comparar todos los clientes</Link>
           <ClientList autoFocus onPick={(c) => { setCliente(c); setOpen(false) }} />
         </div>
       )}

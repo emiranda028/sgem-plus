@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import {
   Boxes, ClipboardList, LayoutDashboard, LogOut, Moon, Settings2, Stethoscope,
-  Sun, Wrench, CalendarClock, Building2, ScrollText, QrCode, Bell, CalendarDays, BarChart3,
+  Sun, Wrench, CalendarClock, Building2, ScrollText, QrCode, Bell, CalendarDays, BarChart3, Scale,
 } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import ClientPicker from './ClientPicker'
@@ -47,6 +47,7 @@ export default function Layout() {
             { to: '/vencimientos', label: 'Vencimientos', icon: CalendarClock, count: alertas.length, danger: alertas.filter((a) => a.estado === 'VENCIDO').length > 0 },
             { to: '/notificaciones', label: 'Notificaciones', icon: Bell },
             { to: '/reportes', label: 'Reportes', icon: BarChart3 },
+            { to: '/comparativa', label: 'Comparativa', icon: Scale },
             { to: '/portal', label: 'Portal del cliente', icon: Building2 },
             { to: '/auditoria', label: 'Auditoría', icon: ScrollText },
             { to: '/configuracion', label: 'Configuración', icon: Settings2 },
