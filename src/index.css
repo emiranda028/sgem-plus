@@ -32,9 +32,9 @@
   --accent-soft: var(--signal-soft);
   --radius: 5px;
   --radius-sm: 4px;
-  --shadow-sm: 0 1px 1px rgba(12,12,20,.04);
-  --shadow: 0 1px 2px rgba(12,12,20,.06), 0 6px 18px -12px rgba(12,12,20,.20);
-  --shadow-lg: 0 18px 44px -20px rgba(12,12,20,.32);
+  --shadow-sm: 0 1px 2px rgba(12,12,20,.05), 0 3px 8px -4px rgba(12,12,20,.07);
+  --shadow: 0 2px 4px rgba(12,12,20,.06), 0 14px 30px -14px rgba(12,12,20,.24);
+  --shadow-lg: 0 26px 56px -22px rgba(12,12,20,.4);
   --sidebar: 250px;
   --ff: 'Schibsted Grotesk', system-ui, -apple-system, sans-serif;
   --ff-d: 'Schibsted Grotesk', system-ui, sans-serif;
@@ -103,8 +103,8 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 /* Botones */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 38px; padding: 0 15px; border-radius: 9px; font-weight: 600; font-size: 13.5px; white-space: nowrap; transition: background .12s, border-color .12s, transform .05s, box-shadow .12s; }
 .btn:active:not(:disabled) { transform: translateY(1px); }
-.btn.primary { background: var(--brand); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,.12) inset, 0 6px 16px -10px var(--brand); }
-.btn.primary:hover:not(:disabled) { background: var(--brand-2); }
+.btn.primary { background: linear-gradient(180deg, var(--brand-3), var(--brand)); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 8px 18px -8px var(--brand); }
+.btn.primary:hover:not(:disabled) { background: linear-gradient(180deg, var(--brand), var(--brand-2)); box-shadow: 0 1px 0 rgba(255,255,255,.18) inset, 0 10px 22px -8px var(--brand); }
 .btn.secondary { background: var(--surface); border: 1px solid var(--border-strong); color: var(--text); }
 .btn.secondary:hover:not(:disabled) { background: var(--surface-2); }
 .btn.ghost { color: var(--text-2); }
@@ -158,10 +158,10 @@ button:disabled { cursor: not-allowed; opacity: .5; }
 .opt-list .logo { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; color: #fff; font-size: 10px; font-weight: 700; flex: none; font-family: var(--ff-d); }
 
 /* Cards */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); transition: box-shadow .16s, transform .12s, border-color .16s; }
 .card.pad { padding: 20px; }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 15px 20px; border-bottom: 1px solid var(--border); }
-.card-head h3 { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.card-head h3 { font-size: 16px; font-weight: 700; letter-spacing: -.015em; }
 .card-body { padding: 20px; }
 
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -209,7 +209,7 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .tbl th { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); padding: 11px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); white-space: nowrap; }
 .tbl td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 .tbl tbody tr { transition: background .1s; }
-.tbl tbody tr:hover { background: var(--surface-2); cursor: pointer; }
+.tbl tbody tr:hover { background: color-mix(in srgb, var(--brand) 5%, var(--surface-2)); cursor: pointer; }
 .tbl tbody tr:last-child td { border-bottom: 0; }
 .tbl .num { text-align: right; font-variant-numeric: tabular-nums; }
 .row-strong { font-weight: 600; }
@@ -383,7 +383,7 @@ table.tbl { width: 100%; border-collapse: collapse; }
 .mcards { display: grid; gap: 12px; }
 .mcard { display: grid; grid-template-columns: auto 1fr auto; gap: 13px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 13px 15px; box-shadow: var(--shadow-sm); position: relative; overflow: visible; text-align: left; width: 100%; transition: transform .1s, box-shadow .15s, border-color .15s; }
 .mcard::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px; border-radius: 0 3px 3px 0; background: var(--acc, var(--brand)); }
-.mcard:hover { box-shadow: var(--shadow); border-color: var(--border-strong); }
+.mcard:hover { box-shadow: var(--shadow); border-color: color-mix(in srgb, var(--acc, var(--brand)) 30%, var(--border)); transform: translateY(-2px); }
 .mcard:active { transform: scale(.985); }
 .mcard .mc-body { min-width: 0; }
 .mcard .mc-title { font-weight: 650; font-size: 14px; letter-spacing: -.01em; line-height: 1.3; overflow-wrap: anywhere; }
