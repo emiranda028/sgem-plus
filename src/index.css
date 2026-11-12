@@ -390,18 +390,18 @@ table.tbl { width: 100%; border-collapse: collapse; }
 @media (prefers-reduced-motion: reduce) { .stagger > *, .mcard { animation: none !important; } }
 
 /* ===== Hero / tarjetas de detalle v3 ===== */
-.hero { flex: none; border-radius: 14px; padding: 16px; display: flex; gap: 14px; align-items: center; position: relative; overflow: hidden; color: #fff; background: linear-gradient(135deg, var(--h1,#0a3f52), var(--h2,#0e7490) 55%, var(--h3,#15a6c4)); box-shadow: var(--shadow); }
+.hero { flex: none; border-radius: var(--radius); padding: 16px; display: flex; gap: 14px; align-items: center; position: relative; overflow: hidden; color: #fff; background: linear-gradient(135deg, var(--h1,#13246b), var(--h2,#1b39c4) 55%, var(--h3,#3a57e0)); box-shadow: var(--shadow); }
 .hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(420px 180px at 90% -20%, rgba(255,255,255,.18), transparent 60%); pointer-events: none; }
 .hero .h-ic { width: 54px; height: 54px; border-radius: 14px; background: rgba(255,255,255,.16); display: grid; place-items: center; flex: none; backdrop-filter: blur(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); }
 .hero .h-body { min-width: 0; position: relative; z-index: 1; }
 .hero .h-kicker { font-family: var(--ff-m); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
 .hero .h-title { font-family: var(--ff-d); font-weight: 800; font-size: 19px; line-height: 1.12; letter-spacing: -.02em; margin-top: 2px; overflow-wrap: anywhere; }
 .hero .h-sub { font-size: 13px; opacity: .9; margin-top: 3px; }
-.hero.ht-ok { --h1:#0b5f33; --h2:#13893f; --h3:#2bbf6a; }
-.hero.ht-warn { --h1:#8a5406; --h2:#bf7408; --h3:#e0a23d; }
-.hero.ht-danger { --h1:#8f241d; --h2:#c0332a; --h3:#ef655b; }
-.hero.ht-brand { --h1:#0a3f52; --h2:#0e7490; --h3:#15a6c4; }
-.hero.ht-accent { --h1:#312b86; --h2:#4f46e5; --h3:#8a83f7; }
+.hero.ht-ok { --h1:#0e5a30; --h2:#15803d; --h3:#2bb365; }
+.hero.ht-warn { --h1:#7a2f0a; --h2:#c2410c; --h3:#e0792f; }
+.hero.ht-danger { --h1:#8a1818; --h2:#cf1d1d; --h3:#e3574e; }
+.hero.ht-brand { --h1:#13246b; --h2:#1b39c4; --h3:#3a57e0; }
+.hero.ht-accent { --h1:#262586; --h2:#4f46e5; --h3:#7b74f0; }
 
 /* Tarjeta de servicio (tablero mobile) */
 .svc-card { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; padding: 14px; box-shadow: var(--shadow-sm); display: grid; gap: 10px; }
