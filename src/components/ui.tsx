@@ -161,4 +161,4 @@ export function Donut({ rows, colors, center }: { rows: { name: string; value: n
   )
 }
 
-export const CHART_COLORS = ['#0b4a44', '#a9792b', '#5f9a8f', '#a7382a', '#2f7d72', '#c08a2e', '#8ba39b']
+export const CHART_COLORS = ['#1b39c4', '#c2410c', '#0e9488', '#6b7280', '#4f46e5', '#b45309', '#9ca3af']

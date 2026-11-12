@@ -23,7 +23,7 @@ export default function Login() {
 
   return (
     <div style={{ minHeight: '100%', display: 'grid', gridTemplateColumns: '1.05fr 1fr' }} className="login-root">
-      <div style={{ background: 'linear-gradient(150deg,#0a3f52,#0e7490 50%,#15a6c4)', color: '#eaf6f9', padding: 'clamp(32px,5vw,64px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 28 }}>
+      <div style={{ background: 'linear-gradient(155deg,#0f1c54,#1b39c4 55%,#3a57e0)', color: '#eaecfb', padding: 'clamp(32px,5vw,64px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ width: 46, height: 46, borderRadius: 13, background: 'rgba(255,255,255,.15)', display: 'grid', placeItems: 'center' }}><Boxes size={26} /></span>
           <div>
