@@ -79,7 +79,7 @@ export default function Comparativa() {
             <BarChart data={chart} layout="vertical" margin={{ left: 8, right: 36, top: 4, bottom: 4 }}>
               <XAxis type="number" domain={metric === 'certPct' || metric === 'prevPct' ? [0, 100] : [0, 'dataMax']} tick={{ fontSize: 11, fill: 'var(--text-3)' }} axisLine={false} tickLine={false} />
               <YAxis type="category" dataKey="name" width={64} tick={{ fontSize: 12, fill: 'var(--text-2)' }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v: number) => [`${v}${activa.suffix}`, activa.label]} contentStyle={{ borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} cursor={{ fill: 'var(--surface-3)' }} />
+              <Tooltip formatter={(v: number) => [`${v}${activa.suffix}`, activa.label]} contentStyle={{ borderRadius: 'var(--radius)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} cursor={{ fill: 'var(--surface-3)' }} />
               <Bar dataKey="value" radius={[0, 5, 5, 0]} label={{ position: 'right', fontSize: 11, fill: 'var(--text-2)', formatter: (v: number) => `${v}${activa.suffix}` }}>
                 {chart.map((d, i) => <Cell key={i} fill={d.isPct ? pctColor(d.value) : metric === 'vencidos' ? (d.value > 0 ? 'var(--danger)' : 'var(--ok)') : 'var(--brand)'} />)}
               </Bar>
@@ -96,7 +96,7 @@ export default function Comparativa() {
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id} onClick={() => setCliente(db.clientes.find((c) => c.id === r.id) ?? null)}>
-                  <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><span style={{ width: 26, height: 26, borderRadius: 7, background: r.color, color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 700, flex: 'none', fontFamily: 'var(--ff-d)' }}>{r.corto.slice(0, 3)}</span><span className="row-strong">{r.nombre}</span></div></td>
+                  <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><span style={{ width: 26, height: 26, borderRadius: 'var(--radius)', background: r.color, color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 700, flex: 'none', fontFamily: 'var(--ff-d)' }}>{r.corto.slice(0, 3)}</span><span className="row-strong">{r.nombre}</span></div></td>
                   <td className="num mono">{r.equipos}</td>
                   <td className="num mono" style={{ color: pctColor(r.certPct), fontWeight: 700 }}>{r.certPct == null ? '—' : `${r.certPct}%`}</td>
                   <td className="num mono" style={{ color: pctColor(r.prevPct), fontWeight: 700 }}>{r.prevPct == null ? '—' : `${r.prevPct}%`}</td>

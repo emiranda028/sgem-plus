@@ -32,7 +32,7 @@ function SolicitudModal({ clienteId, onClose }: { clienteId: number; onClose: ()
           <div className="drawer-head"><h3 style={{ fontSize: 17 }}>Solicitar un servicio</h3><button className="icon-btn" onClick={onClose}><X size={18} /></button></div>
           {enviada ? (
             <div style={{ padding: 28, textAlign: 'center', display: 'grid', gap: 10, justifyItems: 'center' }}>
-              <span style={{ width: 52, height: 52, borderRadius: 14, background: 'var(--ok-soft)', color: 'var(--ok)', display: 'grid', placeItems: 'center' }}><BadgeCheck size={26} /></span>
+              <span style={{ width: 52, height: 52, borderRadius: 'var(--radius)', background: 'var(--ok-soft)', color: 'var(--ok)', display: 'grid', placeItems: 'center' }}><BadgeCheck size={26} /></span>
               <h3 style={{ fontSize: 18 }}>¡Solicitud enviada!</h3>
               <p className="muted" style={{ maxWidth: '36ch' }}>Biotrust recibió tu pedido y lo verá como una orden de servicio nueva. Te vamos a contactar a la brevedad.</p>
               <button className="btn primary" onClick={onClose} style={{ marginTop: 6 }}>Listo</button>
@@ -78,7 +78,7 @@ function Portal({ clienteId }: { clienteId: number }) {
       )}
 
       <div className="card pad" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <span style={{ width: 56, height: 56, borderRadius: 14, background: cliente.color, color: '#fff', display: 'grid', placeItems: 'center', fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 18 }}>{cliente.corto.slice(0, 3)}</span>
+        <span style={{ width: 56, height: 56, borderRadius: 'var(--radius)', background: cliente.color, color: '#fff', display: 'grid', placeItems: 'center', fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 18 }}>{cliente.corto.slice(0, 3)}</span>
         <div>
           <h2 style={{ fontSize: 20 }}>{cliente.nombre}</h2>
           <div className="faint small">{cliente.direccion} · CUIT {cliente.cuit}</div>
@@ -89,7 +89,7 @@ function Portal({ clienteId }: { clienteId: number }) {
       <div className="kpi-row">
         <Kpi label="Equipos" value={d.equipos.length} tone="brand" icon={<Stethoscope size={18} />} />
         <Kpi label="Operativos" value={`${pct(d.equipos.filter((e) => e.estado === 'OPERATIVO').length, d.equipos.length)}%`} tone="ok" icon={<BadgeCheck size={18} />} />
-        <Kpi label="Certificaciones vigentes" value={`${pct(d.vig, d.conCert.length)}%`} tone="info" icon={<ShieldCheck size={18} />} />
+        <Kpi label="Certificaciones vigentes" value={`${pct(d.vig, d.conCert.length)}%`} tone={pct(d.vig, d.conCert.length) >= 80 ? 'ok' : pct(d.vig, d.conCert.length) >= 50 ? 'warn' : 'danger'} icon={<ShieldCheck size={18} />} />
         <Kpi label="Certificados disponibles" value={d.certs.length} tone="accent" icon={<Download size={18} />} />
       </div>
 

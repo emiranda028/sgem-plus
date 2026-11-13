@@ -412,7 +412,7 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
             {fotos.length === 0 ? <span className="faint small">Sin fotos. {puedeEditar && 'Sacá o adjuntá fotos del equipo o del trabajo.'}</span> : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px,1fr))', gap: 8 }}>
                 {fotos.map((src, i) => (
-                  <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: 9, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                  <div key={i} style={{ position: 'relative', aspectRatio: '1', borderRadius: 'var(--radius)', overflow: 'hidden', border: '1px solid var(--border)' }}>
                     <img src={src} alt={`foto ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     {puedeEditar && <button className="icon-btn" onClick={() => quitarFoto(i)} style={{ position: 'absolute', top: 2, right: 2, width: 24, height: 24, background: 'rgba(0,0,0,.55)', color: '#fff' }}><Trash2 size={13} /></button>}
                   </div>

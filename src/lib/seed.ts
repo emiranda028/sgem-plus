@@ -56,50 +56,25 @@ const SERVICIOS = [
   { n: 'Hemodinamia', c: 'ALTA' as const },
 ]
 
-const TIPOS = [
-  { t: 'Monitor multiparamétrico', fab: ['Mindray', 'Philips', 'GE'], cert: true, mant: true },
-  { t: 'Ventilador pulmonar', fab: ['Maquet', 'Dräger', 'Hamilton'], cert: true, mant: true },
-  { t: 'Bomba de infusión', fab: ['B. Braun', 'Baxter', 'Medcaptain'], cert: true, mant: true },
-  { t: 'Electrobisturí', fab: ['Valleylab', 'Erbe', 'WEM'], cert: true, mant: true },
-  { t: 'Desfibrilador', fab: ['Philips', 'Zoll', 'GE'], cert: true, mant: true },
-  { t: 'Cardiodesfibrilador', fab: ['Zoll', 'Philips'], cert: true, mant: true },
-  { t: 'Mesa de anestesia', fab: ['Dräger', 'GE', 'Maquet'], cert: true, mant: true },
-  { t: 'Electrocardiógrafo', fab: ['GE', 'Schiller', 'Mortara'], cert: true, mant: false },
-  { t: 'Autoclave', fab: ['Scican', 'Tuttnauer'], cert: true, mant: true },
-  { t: 'Incubadora neonatal', fab: ['Dräger', 'GE', 'Fanem'], cert: true, mant: true },
-  { t: 'Arco en C', fab: ['Philips', 'Siemens', 'GE'], cert: true, mant: true },
-  { t: 'Ecógrafo', fab: ['GE', 'Philips', 'Mindray'], cert: false, mant: true },
-  { t: 'Bomba de jeringa', fab: ['B. Braun', 'Terumo'], cert: true, mant: false },
-  { t: 'Cama hospitalaria', fab: ['Hill-Rom', 'Quiromed'], cert: false, mant: false },
-  { t: 'Aspirador', fab: ['Silfab', 'Gadmed'], cert: false, mant: true },
+// Marca → modelos reales de ese tipo de equipo (antes el modelo se sorteaba
+// por marca sin mirar el tipo y salían combinaciones imposibles).
+const TIPOS: { t: string; fab: Record<string, string[]>; cert: boolean; mant: boolean }[] = [
+  { t: 'Monitor multiparamétrico', fab: { Mindray: ['BeneVision N22', 'iPM10', 'uMEC12'], Philips: ['IntelliVue MX450', 'IntelliVue MX550'], GE: ['Carescape B450', 'B125'] }, cert: true, mant: true },
+  { t: 'Ventilador pulmonar', fab: { Maquet: ['Servo-i', 'Servo-u'], 'Dräger': ['Evita V500', 'Savina 300'], Hamilton: ['C1', 'G5'] }, cert: true, mant: true },
+  { t: 'Bomba de infusión', fab: { 'B. Braun': ['Infusomat Space'], Baxter: ['Sigma Spectrum'], Medcaptain: ['MP-60'] }, cert: true, mant: true },
+  { t: 'Electrobisturí', fab: { Valleylab: ['Force FX', 'FT10'], Erbe: ['VIO 300 D'], WEM: ['SS-501'] }, cert: true, mant: true },
+  { t: 'Desfibrilador', fab: { Philips: ['HeartStart XL+', 'HeartStart MRx'], Zoll: ['R Series', 'X Series'], Mindray: ['BeneHeart D6'] }, cert: true, mant: true },
+  { t: 'Cardiodesfibrilador', fab: { Zoll: ['R Series'], Philips: ['HeartStart MRx'] }, cert: true, mant: true },
+  { t: 'Mesa de anestesia', fab: { 'Dräger': ['Fabius GS', 'Perseus A500'], GE: ['Aisys CS2', 'Carestation 650'], Maquet: ['Flow-i'] }, cert: true, mant: true },
+  { t: 'Electrocardiógrafo', fab: { GE: ['MAC 2000'], Schiller: ['AT-102'], Mortara: ['ELI 250'] }, cert: true, mant: false },
+  { t: 'Autoclave', fab: { Scican: ['Statim 2000'], Tuttnauer: ['3870EA'] }, cert: true, mant: true },
+  { t: 'Incubadora neonatal', fab: { 'Dräger': ['Babyleo TN500', 'Isolette 8000'], GE: ['Giraffe'], Fanem: ['C-186'] }, cert: true, mant: true },
+  { t: 'Arco en C', fab: { Philips: ['Zenition 70', 'BV Pulsera'], Siemens: ['Cios Alpha'], GE: ['OEC Elite'] }, cert: true, mant: true },
+  { t: 'Ecógrafo', fab: { GE: ['Logiq E10', 'Vivid T8'], Philips: ['Affiniti 70'], Mindray: ['Resona 7'] }, cert: false, mant: true },
+  { t: 'Bomba de jeringa', fab: { 'B. Braun': ['Perfusor Space'], Terumo: ['TE-331'] }, cert: true, mant: false },
+  { t: 'Cama hospitalaria', fab: { 'Hill-Rom': ['Progressa'], Quiromed: ['Mega ICU'] }, cert: false, mant: false },
+  { t: 'Aspirador', fab: { Silfab: ['N33-A'], Gadmed: ['A-500'] }, cert: false, mant: true },
 ]
-
-const MODELOS: Record<string, string[]> = {
-  Mindray: ['uMEC12', 'BeneVision N22', 'iPM10'],
-  Philips: ['MP40', 'IntelliVue MX450', 'HeartStart'],
-  GE: ['B125', 'Carescape R860', 'Logiq E'],
-  Maquet: ['Servo S', 'Servo I', 'Flow-i'],
-  Dräger: ['Evita V500', 'Fabius', 'Babyleo'],
-  Hamilton: ['C1', 'G5'],
-  'B. Braun': ['Infusomat', 'Perfusor'],
-  Baxter: ['Sigma Spectrum'],
-  Medcaptain: ['MP-60'],
-  Valleylab: ['Force FX', 'FT10'],
-  Erbe: ['VIO 300D'],
-  WEM: ['SS-501'],
-  Zoll: ['R Series', 'X Series'],
-  Scican: ['Statim 2000'],
-  Tuttnauer: ['3870EA'],
-  Fanem: ['C-186'],
-  Siemens: ['Cios Alpha'],
-  Schiller: ['AT-102'],
-  Mortara: ['ELI 250'],
-  Terumo: ['TE-331'],
-  'Hill-Rom': ['Progressa'],
-  Quiromed: ['Mega ICU'],
-  Silfab: ['N33-A'],
-  Gadmed: ['A-500'],
-}
 
 const NOMBRES = ['Pablo', 'Eliana', 'Alejandro', 'María', 'Lucía', 'Diego', 'Sofía', 'Martín', 'Carla', 'Federico']
 const APELLIDOS = ['Quiroga', 'Reniero', 'Acosta', 'Gómez', 'Pérez', 'Molina', 'Suárez', 'Torres', 'Díaz', 'Romero']
@@ -151,8 +126,8 @@ export function buildSeed(): DB {
     for (let k = 0; k < total; k++) {
       const serv = pick(servs)
       const def = pick(TIPOS)
-      const fab = pick(def.fab)
-      const modelo = pick(MODELOS[fab] ?? ['—'])
+      const fab = pick(Object.keys(def.fab))
+      const modelo = pick(def.fab[fab])
       const estadoRoll = rnd()
       const estado =
         estadoRoll < 0.78 ? 'OPERATIVO' : estadoRoll < 0.9 ? 'EN TALLER' : estadoRoll < 0.97 ? 'FUERA DE SERVICIO' : 'BAJA'
@@ -263,14 +238,14 @@ export function buildSeed(): DB {
   ordenes.sort((a, b) => b.aperturaISO.localeCompare(a.aperturaISO))
 
   const usuarios: Usuario[] = [
-    { id: 1, username: 'emiranda', nombre: 'Emmanuel', apellido: 'Miranda', email: 'emiranda@biotrust.com.ar', rol: 'ADMIN', clienteIds: [], color: '#0b7a90' },
+    { id: 1, username: 'emiranda', nombre: 'Emmanuel', apellido: 'Miranda', email: 'emiranda@biotrust.com.ar', rol: 'ADMIN', clienteIds: [], color: '#1b39c4' },
     { id: 2, username: 'gestion', nombre: 'Eliana', apellido: 'Reniero', email: 'gestion@biotrust.com.ar', rol: 'GESTION', clienteIds: [], color: '#4f46e5' },
-    { id: 3, username: 'tecnico', nombre: 'Pablo', apellido: 'Quiroga', email: 'tecnico@biotrust.com.ar', rol: 'TECNICO', clienteIds: [], color: '#0891b2' },
+    { id: 3, username: 'tecnico', nombre: 'Pablo', apellido: 'Quiroga', email: 'tecnico@biotrust.com.ar', rol: 'TECNICO', clienteIds: [], color: '#0f766e' },
     { id: 4, username: 'cliente', nombre: 'Lucía', apellido: 'Gómez', email: 'ing.clinica@galeno.com', rol: 'CLIENTE', clienteIds: [1], color: '#0d9488' },
   ]
 
   return {
-    version: 5,
+    version: 6,
     usuarios,
     clientes,
     servicios,
