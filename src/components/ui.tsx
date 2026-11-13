@@ -138,7 +138,7 @@ export function Donut({ rows, colors, center }: { rows: { name: string; value: n
             <Pie data={rows} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={52} outerRadius={78} paddingAngle={2} stroke="var(--surface)" strokeWidth={2} isAnimationActive={false}>
               {rows.map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)}
             </Pie>
-            <Tooltip formatter={(v: number) => [`${v} (${pct(v, total)}%)`, '']} contentStyle={{ borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
+            <Tooltip formatter={(v: number) => [`${v} (${pct(v, total)}%)`, '']} contentStyle={{ borderRadius: 'var(--radius)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} />
           </PieChart>
         </ResponsiveContainer>
         {center && (

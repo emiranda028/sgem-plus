@@ -12,9 +12,11 @@ const DEMO: { username: string; rol: Role; desc: string; label?: string }[] = [
 ]
 
 export default function Login() {
-  const { user, login } = useStore()
+  const { user, login, db } = useStore()
+  const instituciones = db.clientes.length
+  const equipos = db.equipos.filter((e) => e.estado !== 'BAJA').length
   const nav = useNavigate()
-  const [sel, setSel] = useState('admin')
+  const [sel, setSel] = useState('emiranda')
   if (user) return <Navigate to={user.rol === 'CLIENTE' ? '/portal' : '/'} replace />
 
   const enter = (u: string) => {
@@ -23,29 +25,32 @@ export default function Login() {
 
   return (
     <div style={{ minHeight: '100%', display: 'grid', gridTemplateColumns: '1.05fr 1fr' }} className="login-root">
-      <div style={{ background: 'linear-gradient(155deg,#0f1c54,#1b39c4 55%,#3a57e0)', color: '#eaecfb', padding: 'clamp(32px,5vw,64px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 28 }}>
+      <div style={{ background: '#1b39c4', color: '#eaecfb', padding: 'clamp(32px,5vw,64px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ width: 46, height: 46, borderRadius: 13, background: 'rgba(255,255,255,.15)', display: 'grid', placeItems: 'center' }}><Boxes size={26} /></span>
+          <span style={{ width: 46, height: 46, borderRadius: 'var(--radius)', background: 'rgba(255,255,255,.15)', display: 'grid', placeItems: 'center' }}><Boxes size={26} /></span>
           <div>
             <b style={{ fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 24, color: '#fff', display: 'block', lineHeight: 1 }}>SGEM Plus</b>
-            <small style={{ color: '#a7cfda', letterSpacing: '.14em', textTransform: 'uppercase', fontSize: 11 }}>Biotrust</small>
+            <small style={{ color: 'rgba(255,255,255,.72)', letterSpacing: '.14em', textTransform: 'uppercase', fontSize: 11 }}>Biotrust</small>
           </div>
         </div>
         <h1 style={{ color: '#fff', fontSize: 'clamp(1.8rem,3.4vw,2.6rem)', fontWeight: 800, lineHeight: 1.08, maxWidth: '16ch' }}>
-          La plataforma premium de equipamiento médico
+          Gestión de equipamiento médico para clínicas y sanatorios
         </h1>
-        <p style={{ color: '#d5ecf2', fontSize: 16, maxWidth: '40ch', margin: 0 }}>
-          Inventario, certificaciones, mantenimientos y órdenes de servicio, con portal del cliente, alertas y trabajo en campo.
+        <p style={{ color: 'rgba(255,255,255,.86)', fontSize: 16, maxWidth: '42ch', margin: 0 }}>
+          Inventario, certificaciones, mantenimientos y órdenes de servicio en un solo lugar, con portal para cada institución.
+        </p>
+        <p style={{ color: '#fff', fontSize: 15, fontWeight: 600, margin: 0 }} className="mono">
+          La demo trae {equipos} equipos de {instituciones} instituciones.
         </p>
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 12 }}>
           {[
-            { icon: Bell, t: 'Alertas de vencimiento proactivas' },
+            { icon: Bell, t: 'Aviso antes de cada vencimiento' },
             { icon: QrCode, t: 'Etiquetas QR por equipo' },
             { icon: ShieldCheck, t: 'Firma digital y certificados en PDF' },
-            { icon: Smartphone, t: 'App instalable y uso sin conexión' },
+            { icon: Smartphone, t: 'Se instala en el celular del técnico' },
           ].map(({ icon: Icon, t }) => (
-            <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 11, color: '#eaf6f9', fontSize: 14.5 }}>
-              <span style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,.12)', display: 'grid', placeItems: 'center' }}><Icon size={16} /></span>
+            <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 11, color: '#fff', fontSize: 15 }}>
+              <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,.12)', display: 'grid', placeItems: 'center' }}><Icon size={16} /></span>
               {t}
             </li>
           ))}
@@ -66,7 +71,7 @@ export default function Login() {
                 className="card"
                 style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 14, textAlign: 'left', borderColor: sel === d.username ? 'var(--brand)' : undefined, boxShadow: sel === d.username ? '0 0 0 3px var(--brand-soft)' : undefined }}
               >
-                <span style={{ width: 38, height: 38, borderRadius: 10, display: 'grid', placeItems: 'center', background: 'var(--brand-soft)', color: 'var(--brand)', fontWeight: 700, fontFamily: 'var(--ff-d)' }}>
+                <span style={{ width: 38, height: 38, borderRadius: 'var(--radius)', display: 'grid', placeItems: 'center', background: 'var(--brand-soft)', color: 'var(--brand)', fontWeight: 700, fontFamily: 'var(--ff-d)' }}>
                   {d.username[0].toUpperCase()}
                 </span>
                 <div style={{ flex: 1 }}>

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Area, AreaChart, LabelList, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import { BadgeCheck, CalendarClock, Stethoscope, Wrench } from 'lucide-react'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
@@ -45,12 +45,13 @@ function Tab({ clienteId }: { clienteId: number }) {
 
     // OS últimos 6 meses
     const now = new Date('2026-11-07')
-    const meses: { name: string; value: number }[] = []
+    const meses: { name: string; value: number; parcial: boolean }[] = []
     for (let i = 5; i >= 0; i--) {
       const dt = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const key = dt.toISOString().slice(0, 7)
-      const label = dt.toLocaleDateString('es-AR', { month: 'short' })
-      meses.push({ name: label, value: ordenes.filter((o) => o.aperturaISO.slice(0, 7) === key).length })
+      // clave armada a mano: toISOString corre el mes en zonas horarias al este de UTC
+      const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`
+      const label = dt.toLocaleDateString('es-AR', { month: 'short' }).replace('.', '')
+      meses.push({ name: i === 0 ? `${label} *` : label, value: ordenes.filter((o) => o.aperturaISO.slice(0, 7) === key).length, parcial: i === 0 })
     }
 
     return { equipos, cert, mp, enTaller, porServicio, pertenencia, ordenes, meses }
@@ -60,9 +61,9 @@ function Tab({ clienteId }: { clienteId: number }) {
     <Page title="Tablero" sub={cliente?.nombre}>
       <div className="kpi-row">
         <Kpi label="Equipos activos" value={d.equipos.length} tone="brand" icon={<Stethoscope size={18} />} hint={`${d.enTaller.length} en taller ahora`} to="/equipos" />
-        <Kpi label="Certificaciones vigentes" value={`${pct(d.cert.ok, d.cert.total)}%`} tone="ok" icon={<BadgeCheck size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.cert.ven} vencidas · {d.cert.pv} por vencer</span>} to="/vencimientos" />
-        <Kpi label="Preventivos vigentes" value={`${pct(d.mp.ok, d.mp.total)}%`} tone="warn" icon={<CalendarClock size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.mp.ven} vencidos</span>} to="/vencimientos" />
-        <Kpi label="En taller" value={d.enTaller.length} tone={d.enTaller.length ? 'danger' : 'neutral'} icon={<Wrench size={18} />} hint="Ver detalle en Taller" to="/taller" />
+        <Kpi label="Certificaciones vigentes" value={`${pct(d.cert.ok, d.cert.total)}%`} tone={meta(pct(d.cert.ok, d.cert.total))} icon={<BadgeCheck size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.cert.ven} vencidas · {d.cert.pv} por vencer</span>} to="/vencimientos" />
+        <Kpi label="Preventivos vigentes" value={`${pct(d.mp.ok, d.mp.total)}%`} tone={meta(pct(d.mp.ok, d.mp.total))} icon={<CalendarClock size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.mp.ven} vencidos</span>} to="/vencimientos" />
+        <Kpi label="En taller" value={d.enTaller.length} tone={d.enTaller.length ? 'warn' : 'neutral'} icon={<Wrench size={18} />} hint="Ver detalle en Taller" to="/taller" />
       </div>
 
       <div className="grid-dash">
@@ -120,16 +121,17 @@ function Tab({ clienteId }: { clienteId: number }) {
           </div>
           <div className="card pad">
             <h3 style={{ fontSize: 15, marginBottom: 6 }}>Órdenes por mes</h3>
-            <ResponsiveContainer width="100%" height={140}>
-              <AreaChart data={d.meses} margin={{ top: 22, right: 10, left: 10, bottom: 0 }}>
-                <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--brand)" stopOpacity={0.35} /><stop offset="100%" stopColor="var(--brand)" stopOpacity={0} /></linearGradient></defs>
-                <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-3)' }} axisLine={false} tickLine={false} />
-                <Tooltip formatter={(v: number) => [`${v} órdenes`, '']} contentStyle={{ borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12 }} />
-                <Area type="monotone" dataKey="value" stroke="var(--brand)" strokeWidth={2} fill="url(#g)" dot={{ r: 3, fill: 'var(--brand)', strokeWidth: 0 }}>
-                  <LabelList dataKey="value" position="top" offset={10} style={{ fontSize: 12, fontWeight: 700, fill: 'var(--text)' }} />
-                </Area>
-              </AreaChart>
+            <ResponsiveContainer width="100%" height={150}>
+              <BarChart data={d.meses} margin={{ top: 22, right: 4, left: 4, bottom: 0 }}>
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--text-3)' }} axisLine={false} tickLine={false} />
+                <Tooltip cursor={{ fill: 'var(--surface-3)' }} formatter={(v: number) => [`${v} órdenes`, '']} contentStyle={{ borderRadius: 'var(--radius)', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12 }} />
+                <Bar dataKey="value" radius={[3, 3, 0, 0]} isAnimationActive={false}>
+                  {d.meses.map((m) => <Cell key={m.name} fill={m.parcial ? 'var(--brand-soft)' : 'var(--brand)'} stroke={m.parcial ? 'var(--brand)' : undefined} strokeDasharray={m.parcial ? '3 2' : undefined} />)}
+                  <LabelList dataKey="value" position="top" offset={6} style={{ fontSize: 12, fontWeight: 700, fill: 'var(--text)' }} />
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
+            <p className="faint small" style={{ margin: '6px 0 0' }}>* Mes en curso</p>
           </div>
         </div>
       </div>
@@ -175,6 +177,9 @@ function Tab({ clienteId }: { clienteId: number }) {
     </Page>
   )
 }
+
+/** Semáforo de cumplimiento: verde desde 80%, ámbar desde 50%, rojo debajo. */
+const meta = (v: number) => (v >= 80 ? 'ok' : v >= 50 ? 'warn' : 'danger') as 'ok' | 'warn' | 'danger'
 
 export default function Tablero() {
   return <RequireCliente>{(id) => <Tab clienteId={id} />}</RequireCliente>

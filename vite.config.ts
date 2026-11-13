@@ -21,13 +21,13 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: 'SGEM Plus · Equipamiento Médico',
           short_name: 'SGEM Plus',
-          description: 'Plataforma premium de gestión de equipamiento médico',
+          description: 'Inventario, certificaciones y mantenimiento de equipamiento médico para clínicas y sanatorios',
           lang: 'es-AR',
           start_url: base,
           scope: base,
           display: 'standalone',
-          theme_color: '#0e7490',
-          background_color: '#f1f5f6',
+          theme_color: '#1b39c4',
+          background_color: '#f3f4f6',
           icons: [
             { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
             { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },

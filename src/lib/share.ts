@@ -20,7 +20,7 @@ export async function shareSelectionImage(opts: { title: string; subtitle?: stri
   wrap.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;">
       <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(145deg,#086173,#15a6bf);"></div>
-      <div style="font-family:'Bricolage Grotesque',Inter,sans-serif;font-weight:800;font-size:20px;letter-spacing:-.02em;">SGEM <span style="color:#0b7a90;">Plus</span></div>
+      <div style="font-family:'Schibsted Grotesk',system-ui,sans-serif;font-weight:800;font-size:20px;letter-spacing:-.02em;">SGEM <span style="color:#1b39c4;">Plus</span></div>
     </div>
     <div style="font-weight:800;font-size:23px;letter-spacing:-.02em;margin-top:16px;">${esc(opts.title)}</div>
     ${opts.subtitle ? `<div style="color:#4f636e;font-size:14px;margin-top:3px;">${esc(opts.subtitle)}</div>` : ''}

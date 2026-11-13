@@ -89,7 +89,7 @@ function Agenda({ clienteId }: { clienteId: number }) {
               </div>
               <div style={{ padding: 8, display: 'grid', gap: 6 }}>
                 {items.map((o: OrdenServicio) => (
-                  <button key={o.id} onClick={() => nav('/ordenes')} style={{ textAlign: 'left', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: `3px solid ${colorDe(o.tecnico)}`, borderRadius: 8, padding: '7px 9px' }}>
+                  <button key={o.id} onClick={() => nav('/ordenes')} style={{ textAlign: 'left', background: 'var(--surface)', border: '1px solid var(--border)', borderLeft: `3px solid ${colorDe(o.tecnico)}`, borderRadius: 'var(--radius)', padding: '7px 9px' }}>
                     <div style={{ fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{o.titulo}</div>
                     <div className="faint" style={{ fontSize: 11 }}>{o.tecnico}</div>
                   </button>

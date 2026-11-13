@@ -77,7 +77,7 @@ function Reportes({ clienteId }: { clienteId: number }) {
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={r.meses} margin={{ top: 6, right: 4, left: 4, bottom: 0 }}>
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--text-3)' }} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{ fill: 'var(--surface-3)' }} contentStyle={{ borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12 }} />
+              <Tooltip cursor={{ fill: 'var(--surface-3)' }} contentStyle={{ borderRadius: 'var(--radius)', border: '1px solid var(--border)', background: 'var(--surface)', fontSize: 12 }} />
               <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                 {r.meses.map((_, i) => <Cell key={i} fill="var(--brand)" />)}
               </Bar>

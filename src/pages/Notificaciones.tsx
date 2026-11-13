@@ -80,19 +80,19 @@ function Notificaciones({ clienteId }: { clienteId: number }) {
         <div className="card">
           <div className="card-head"><h3>Vista previa del mail</h3><Badge tone={resumen.vencidos.length ? 'danger' : 'ok'}>{resumen.total} ítems</Badge></div>
           <div className="card-body">
-            <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-              <div style={{ background: 'linear-gradient(135deg,var(--brand-2),var(--brand-3))', color: '#fff', padding: '16px 18px' }}>
+            <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
+              <div style={{ background: 'var(--brand)', color: '#fff', padding: '16px 18px' }}>
                 <div style={{ fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 18 }}>SGEM Plus · Vencimientos</div>
                 <div style={{ opacity: .85, fontSize: 13 }}>{cliente?.nombre}</div>
               </div>
               <div style={{ padding: 16, display: 'grid', gap: 10 }}>
                 <p className="small muted" style={{ margin: 0 }}>Hola equipo, este es el estado del equipamiento para los próximos {cfg.anticipacion} días:</p>
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 9, padding: 10, textAlign: 'center' }}>
+                  <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 10, textAlign: 'center' }}>
                     <div style={{ fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 22, color: 'var(--danger)' }}>{resumen.vencidos.length}</div>
                     <div className="faint small">Vencidos</div>
                   </div>
-                  <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 9, padding: 10, textAlign: 'center' }}>
+                  <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 10, textAlign: 'center' }}>
                     <div style={{ fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 22, color: 'var(--warn)' }}>{resumen.porVencer.length}</div>
                     <div className="faint small">Por vencer</div>
                   </div>

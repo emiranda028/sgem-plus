@@ -15,6 +15,6 @@ export function useQrDataUrl(text: string, size = 128) {
 
 export function Qr({ text, size = 128 }: { text: string; size?: number }) {
   const url = useQrDataUrl(text, size)
-  if (!url) return <div style={{ width: size, height: size, borderRadius: 6, background: 'var(--surface-3)' }} />
+  if (!url) return <div style={{ width: size, height: size, borderRadius: 'var(--radius)', background: 'var(--surface-3)' }} />
   return <img src={url} width={size} height={size} alt={`QR ${text}`} />
 }

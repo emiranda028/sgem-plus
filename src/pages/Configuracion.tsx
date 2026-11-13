@@ -32,7 +32,7 @@ export default function Configuracion() {
           {CATS.map((c) => (
             <button key={c.key} className={`nav-item ${cat === c.key ? 'on' : ''}`} onClick={() => setCat(c.key)}
               ref={cat === c.key ? (el) => el?.scrollIntoView({ block: 'nearest', inline: 'center' }) : undefined}
-              style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 9, fontWeight: 600, fontSize: 13.5, background: cat === c.key ? 'var(--brand-soft)' : 'transparent', color: cat === c.key ? 'var(--brand)' : 'var(--text-2)' }}>
+              style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 'var(--radius)', fontWeight: 600, fontSize: 13.5, background: cat === c.key ? 'var(--brand-soft)' : 'transparent', color: cat === c.key ? 'var(--brand)' : 'var(--text-2)' }}>
               {c.label}
             </button>
           ))}
