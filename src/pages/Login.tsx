@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Boxes, ShieldCheck, Smartphone, QrCode, Bell } from 'lucide-react'
+import { HeroTraces } from '../components/Vitals'
 import { useStore, ROLE_LABEL } from '../lib/store'
 import type { Role } from '../lib/types'
 
@@ -25,7 +26,8 @@ export default function Login() {
 
   return (
     <div style={{ minHeight: '100%', display: 'grid', gridTemplateColumns: '1.05fr 1fr' }} className="login-root">
-      <div style={{ background: '#1b39c4', color: '#eaecfb', padding: 'clamp(32px,5vw,64px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 28 }}>
+      <div style={{ background: '#1b39c4', color: '#eaecfb', padding: 'clamp(32px,5vw,64px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 28, position: 'relative', overflow: 'hidden', isolation: 'isolate' }} className="login-hero stagger">
+        <HeroTraces />
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ width: 46, height: 46, borderRadius: 'var(--radius)', background: 'rgba(255,255,255,.15)', display: 'grid', placeItems: 'center' }}><Boxes size={26} /></span>
           <div>
@@ -63,7 +65,7 @@ export default function Login() {
             <h2 style={{ fontSize: 22, fontWeight: 750 }}>Entrar a la demo</h2>
             <p className="muted" style={{ marginTop: 4 }}>Elegí un perfil para recorrer la plataforma. Los datos son de demostración y viven en este navegador.</p>
           </div>
-          <div style={{ display: 'grid', gap: 10 }}>
+          <div style={{ display: 'grid', gap: 10 }} className="stagger">
             {DEMO.map((d) => (
               <button
                 key={d.username}

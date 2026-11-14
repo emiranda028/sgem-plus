@@ -4,6 +4,7 @@ import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { Badge, EmptyState, EstadoBadge, IconTile, VigBadge, iconEquipo, useIsMobile } from '../components/ui'
 import { Qr } from '../components/Qr'
+import EquipoArt, { tieneArt } from '../components/EquipoArt'
 import { SelectBox, SelectToggle, SelectionBar, useSelection } from '../components/Selection'
 import { useStore } from '../lib/store'
 import { certificadoPDF } from '../lib/pdf'
@@ -159,7 +160,8 @@ function Ficha({ equipo, onClose, readOnly }: { equipo: Equipo; onClose: () => v
         <div className="drawer-body">
           {(() => { const Ic = iconEquipo(equipo.tipo); const ht = equipo.estado === 'OPERATIVO' ? 'ok' : equipo.estado === 'EN TALLER' ? 'warn' : equipo.estado === 'FUERA DE SERVICIO' ? 'danger' : 'brand'; return (
             <div className={`hero ht-${ht}`}>
-              <span className="h-ic"><Ic size={28} /></span>
+              <span className="h-ic h-ic-art">{tieneArt(equipo.tipo) ? <EquipoArt tipo={equipo.tipo} size={58} /> : <Ic size={28} />}</span>
+              <EquipoArt tipo={equipo.tipo} size={190} className="h-ghost" />
               <div className="h-body">
                 <div className="h-kicker">{equipo.qr}</div>
                 <div className="h-title">{equipo.tipo}</div>

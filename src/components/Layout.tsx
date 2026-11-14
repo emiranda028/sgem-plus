@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import {
   Boxes, ClipboardList, LayoutDashboard, LogOut, Moon, Settings2, Stethoscope,
   Sun, Wrench, CalendarClock, Building2, ScrollText, QrCode, Bell, CalendarDays, BarChart3, Scale,
@@ -17,6 +17,7 @@ export default function Layout() {
   const { theme, toggle } = useTheme()
   const alertas = useAlertas(cliente?.id)
   const esCliente = user?.rol === 'CLIENTE'
+  const { pathname } = useLocation()
 
   const abiertas = db.ordenes.filter((o) => o.situacion !== 'Cerrada' && (!cliente || o.clienteId === cliente.id)).length
 
@@ -104,7 +105,7 @@ export default function Layout() {
             <UserMenu />
           </div>
         </header>
-        <main className="content"><Outlet /></main>
+        <main className="content" key={pathname}><Outlet /></main>
       </div>
 
       <nav className="bottom-nav">

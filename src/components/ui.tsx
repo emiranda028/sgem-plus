@@ -7,6 +7,7 @@ import {
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import type { EstadoEquipo, EstadoVig } from '../lib/types'
 import { pct } from '../lib/format'
+import { useCountUp } from '../lib/motion'
 
 export function useIsMobile(bp = 760) {
   const [m, setM] = useState(() => (typeof window !== 'undefined' ? window.innerWidth <= bp : false))
@@ -70,6 +71,15 @@ export function Badge({ children, tone = 'neutral', dot }: { children: ReactNode
   )
 }
 
+function Contado({ n, suf }: { n: number; suf: string }) {
+  return <>{useCountUp(n)}{suf}</>
+}
+function KpiValue({ value }: { value: ReactNode }) {
+  if (typeof value === 'number') return <Contado n={value} suf="" />
+  if (typeof value === 'string') { const m = /^(\d+)(%|d)?$/.exec(value); if (m) return <Contado n={Number(m[1])} suf={m[2] ?? ''} /> }
+  return <>{value}</>
+}
+
 export function Kpi({ label, value, hint, tone = 'brand', icon, to }: { label: string; value: ReactNode; hint?: ReactNode; tone?: Tone; icon?: ReactNode; to?: string }) {
   const inner = (
     <>
@@ -77,7 +87,7 @@ export function Kpi({ label, value, hint, tone = 'brand', icon, to }: { label: s
         <span className="lbl">{label}</span>
         {icon && <span className="ic">{icon}</span>}
       </div>
-      <div className="val mono">{value}</div>
+      <div className="val mono"><KpiValue value={value} /></div>
       {hint && <div className="hint">{hint}{to && <ChevronRight size={13} className="kpi-go" />}</div>}
     </>
   )

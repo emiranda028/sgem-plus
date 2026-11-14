@@ -543,3 +543,70 @@ table.tbl { width: 100%; border-collapse: collapse; }
   .umbtn { min-width: 44px; min-height: 44px; display: inline-grid; place-items: center; }
   .brand-mobile { min-height: 44px; }
 }
+
+/* ===== Signos vitales del parque (monitor) ===== */
+.vt { position: relative; overflow: hidden; isolation: isolate; border-radius: 12px; background: #060a11; color: #dfe9f5; border: 1px solid #16202e; box-shadow: var(--shadow); }
+.vt::before { content: ""; position: absolute; inset: 0; z-index: -1; background-image: linear-gradient(rgba(92,200,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(92,200,255,.06) 1px, transparent 1px); background-size: 22px 22px; -webkit-mask-image: radial-gradient(120% 110% at 75% 50%, #000 35%, transparent 100%); mask-image: radial-gradient(120% 110% at 75% 50%, #000 35%, transparent 100%); }
+.vt-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #121b28; font-family: var(--ff-m); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: #7f93ab; }
+.vt-top span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vt-main { display: grid; grid-template-columns: 260px 1fr; }
+.vt-health { padding: 20px 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; border-right: 1px solid #121b28; text-align: center; }
+.vt-ring { position: relative; width: 150px; height: 150px; flex: none; }
+.vt-ring svg { transform: rotate(-90deg); display: block; }
+.vt-ring .c { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; color: #fff; }
+.vt-ring .n { font-family: var(--ff-d); font-weight: 800; font-size: 48px; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.vt-ring .l { font-family: var(--ff-m); font-size: 9px; letter-spacing: .18em; color: #7f93ab; margin-top: 5px; }
+.vt-state { display: grid; gap: 5px; justify-items: center; min-width: 0; }
+.vt-state b { font-family: var(--ff-d); font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
+.vt-state span { font-size: 11.5px; color: #7f93ab; max-width: 26ch; line-height: 1.35; }
+.vt-alarm { margin-top: 6px; display: inline-flex; align-items: center; gap: 7px; font-family: var(--ff-m); font-size: 10.5px; letter-spacing: .04em; color: #ffb4ac; background: rgba(255,107,94,.12); border: 1px solid rgba(255,107,94,.4); padding: 5px 10px; border-radius: 6px; }
+.vt-alarm i { width: 7px; height: 7px; border-radius: 50%; background: #ff6b5e; box-shadow: 0 0 0 0 rgba(255,107,94,.7); animation: vtpulse 1.4s infinite; }
+@keyframes vtpulse { 70% { box-shadow: 0 0 0 7px rgba(255,107,94,0); } 100% { box-shadow: 0 0 0 0 rgba(255,107,94,0); } }
+.vt-rows { display: grid; min-width: 0; }
+.vt-row { display: grid; grid-template-columns: minmax(0, 1fr) 158px; align-items: center; border-bottom: 1px solid #121b28; color: var(--c); transition: background .15s; }
+.vt-row:last-child { border-bottom: 0; }
+.vt-row:hover { background: rgba(255,255,255,.025); }
+.vt-row canvas { width: 100%; display: block; }
+.vt-read { padding: 8px 18px 8px 8px; text-align: right; }
+.vt-read .k { font-family: var(--ff-m); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; opacity: .9; }
+.vt-read .v { font-family: var(--ff-d); font-weight: 800; font-size: 34px; line-height: 1.05; font-variant-numeric: tabular-nums; text-shadow: 0 0 18px color-mix(in srgb, var(--c) 45%, transparent); }
+.vt-read .v small { font-size: 14px; margin-left: 2px; opacity: .8; }
+.vt-read .s { font-size: 11px; color: #7f93ab; }
+@media (max-width: 760px) {
+  .vt-main { grid-template-columns: 1fr; }
+  .vt-health { flex-direction: row; justify-content: flex-start; text-align: left; border-right: 0; border-bottom: 1px solid #121b28; padding: 14px 16px; gap: 16px; }
+  .vt-ring { width: 98px; height: 98px; }
+  .vt-ring .n { font-size: 32px; }
+  .vt-state { justify-items: start; }
+  .vt-row { grid-template-columns: minmax(0, 1fr) 112px; }
+  .vt-read { padding: 6px 14px 6px 4px; }
+  .vt-read .v { font-size: 27px; }
+}
+
+/* ===== Ilustraciones de equipos: se trazan solas ===== */
+.eq-art path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: eqdraw .9s cubic-bezier(.55,.1,.2,1) forwards; }
+@keyframes eqdraw { to { stroke-dashoffset: 0; } }
+.hero .h-ic-art { width: 76px; height: 76px; border-radius: 16px; }
+.hero .h-ghost { position: absolute; right: -22px; bottom: -34px; opacity: .16; pointer-events: none; stroke-width: 1.6; }
+.hero .h-ghost path { animation-duration: 1.6s; }
+
+/* ===== Login: trazas de fondo ===== */
+.hero-traces { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+
+/* ===== Movimiento: páginas y fichas ===== */
+@keyframes pagein { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.content { animation: pagein .34s cubic-bezier(.2,.8,.2,1); }
+.drawer { animation: slidein .34s cubic-bezier(.2,.85,.25,1); }
+@keyframes slidein { from { transform: translateX(56px); opacity: 0; } to { transform: none; opacity: 1; } }
+.scrim { animation: fadein .25s ease; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheetup { from { transform: translateY(18%); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (max-width: 760px) {
+  .drawer { top: 12px; border-radius: 18px 18px 0 0; border-left: 0; animation: sheetup .38s cubic-bezier(.2,.9,.25,1); overflow: hidden; }
+}
+@media (prefers-reduced-motion: reduce) { .eq-art path { animation: none; stroke-dashoffset: 0; } .vt-alarm i { animation: none; } }
+.hero .h-ghost { right: -64px; bottom: -52px; opacity: .1; }
+@media (max-width: 760px) {
+  .vt-row { grid-template-columns: minmax(0, 1fr) 128px; }
+  .vt-read .k { letter-spacing: .06em; font-size: 9px; }
+}

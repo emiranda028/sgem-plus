@@ -5,12 +5,15 @@ import { BadgeCheck, CalendarClock, Stethoscope, Wrench } from 'lucide-react'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
 import { Badge, CHART_COLORS, Donut, EmptyState, IconTile, Kpi, Progress, iconOS, useIsMobile } from '../components/ui'
+import VitalsBand from '../components/Vitals'
 import { useStore } from '../lib/store'
 import { clean, diasDesde, fecha, pct, vigencia } from '../lib/format'
 
 function situTone(s: string): 'ok' | 'danger' | 'warn' {
   return s === 'Cerrada' || s === 'Lista' ? 'ok' : s === 'Esperando repuesto' ? 'danger' : 'warn'
 }
+
+const servCount = (d: { porServicio: unknown[] }) => d.porServicio.length
 
 function Tab({ clienteId }: { clienteId: number }) {
   const { db, cliente } = useStore()
@@ -59,10 +62,21 @@ function Tab({ clienteId }: { clienteId: number }) {
 
   return (
     <Page title="Tablero" sub={cliente?.nombre}>
+      {(() => {
+        const oper = d.equipos.filter((e) => e.estado === 'OPERATIVO').length
+        return (
+          <VitalsBand titulo={cliente?.corto ?? cliente?.nombre ?? ''}
+            cert={{ pct: pct(d.cert.ok, d.cert.total), ok: d.cert.ok, total: d.cert.total }}
+            prev={{ pct: pct(d.mp.ok, d.mp.total), ok: d.mp.ok, total: d.mp.total }}
+            disp={{ pct: pct(oper, d.equipos.length), ok: oper, total: d.equipos.length }}
+            vencidos={d.cert.ven + d.mp.ven} />
+        )
+      })()}
+
       <div className="kpi-row">
-        <Kpi label="Equipos activos" value={d.equipos.length} tone="brand" icon={<Stethoscope size={18} />} hint={`${d.enTaller.length} en taller ahora`} to="/equipos" />
-        <Kpi label="Certificaciones vigentes" value={`${pct(d.cert.ok, d.cert.total)}%`} tone={meta(pct(d.cert.ok, d.cert.total))} icon={<BadgeCheck size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.cert.ven} vencidas · {d.cert.pv} por vencer</span>} to="/vencimientos" />
-        <Kpi label="Preventivos vigentes" value={`${pct(d.mp.ok, d.mp.total)}%`} tone={meta(pct(d.mp.ok, d.mp.total))} icon={<CalendarClock size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.mp.ven} vencidos</span>} to="/vencimientos" />
+        <Kpi label="Equipos activos" value={d.equipos.length} tone="brand" icon={<Stethoscope size={18} />} hint={`${servCount(d)} servicios`} to="/equipos" />
+        <Kpi label="Órdenes abiertas" value={d.ordenes.filter((o) => o.situacion !== 'Cerrada').length} tone="info" icon={<BadgeCheck size={18} />} hint="Ver órdenes de servicio" to="/ordenes" />
+        <Kpi label="Por vencer (30 días)" value={d.cert.pv + d.mp.pv} tone="warn" icon={<CalendarClock size={18} />} hint={<span style={{ color: 'var(--danger)' }}>{d.cert.ven + d.mp.ven} ya vencidos</span>} to="/vencimientos" />
         <Kpi label="En taller" value={d.enTaller.length} tone={d.enTaller.length ? 'warn' : 'neutral'} icon={<Wrench size={18} />} hint="Ver detalle en Taller" to="/taller" />
       </div>
 
@@ -177,9 +191,6 @@ function Tab({ clienteId }: { clienteId: number }) {
     </Page>
   )
 }
-
-/** Semáforo de cumplimiento: verde desde 80%, ámbar desde 50%, rojo debajo. */
-const meta = (v: number) => (v >= 80 ? 'ok' : v >= 50 ? 'warn' : 'danger') as 'ok' | 'warn' | 'danger'
 
 export default function Tablero() {
   return <RequireCliente>{(id) => <Tab clienteId={id} />}</RequireCliente>
