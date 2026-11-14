@@ -72,7 +72,7 @@ export function Badge({ children, tone = 'neutral', dot }: { children: ReactNode
 }
 
 function Contado({ n, suf }: { n: number; suf: string }) {
-  return <>{useCountUp(n)}{suf}</>
+  return <>{useCountUp(n)}{suf && <span className="u">{suf}</span>}</>
 }
 function KpiValue({ value }: { value: ReactNode }) {
   if (typeof value === 'number') return <Contado n={value} suf="" />

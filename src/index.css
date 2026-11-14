@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&family=Martian+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&family=Martian+Mono:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap');
 
 /* Dirección "Bitácora": suizo con carácter. Grotesca editorial de peso
    (Schibsted Grotesk) para marca, titulares, cuerpo y números; mono de
@@ -609,4 +609,134 @@ table.tbl { width: 100%; border-collapse: collapse; }
 @media (max-width: 760px) {
   .vt-row { grid-template-columns: minmax(0, 1fr) 128px; }
   .vt-read .k { letter-spacing: .06em; font-size: 9px; }
+}
+
+/* =====================================================================
+   Lenguaje "placa y planilla": el sistema visual sale de la placa de
+   identificación del equipo y de la planilla técnica de servicio.
+   Sin cajas flotantes: secciones sobre el papel separadas por filetes de
+   tinta. Números en condensada de señalética. Estados como indicador LED.
+   ===================================================================== */
+:root { --ff-n: 'Barlow Condensed', 'Schibsted Grotesk', system-ui, sans-serif; --radius: 2px; --radius-sm: 2px; --bg: #f6f6f3; }
+[data-theme="dark"] { --bg: #0a0d13; }
+body { background-image: none; }
+
+/* Título de página */
+.page-head { border-bottom: 2px solid var(--text); padding-bottom: 12px; }
+.page-head h1 { font-family: var(--ff-n); font-weight: 700; font-size: 46px; line-height: .88; letter-spacing: .004em; text-transform: uppercase; }
+.page-head .sub { font-family: var(--ff-m); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--text-2); margin-top: 9px; }
+
+/* Secciones sin caja */
+.card { background: transparent; border: 0; border-top: 1px solid var(--text); border-radius: 0; box-shadow: none; }
+.card.pad { padding: 14px 0 0; }
+.card-head { padding: 10px 0; border-bottom: 1px solid var(--border-strong); }
+.card-head h3 { font-family: var(--ff-m); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.card-body { padding: 14px 0; }
+.card.pad > h3 { font-family: var(--ff-m); font-size: 11px !important; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+
+/* Tablas: planilla */
+.tbl th { background: transparent; border-bottom: 1px solid var(--text); font-family: var(--ff-m); font-size: 10px; font-weight: 500; letter-spacing: .08em; color: var(--text-2); padding: 9px 12px; }
+.tbl td { padding: 12px; border-bottom: 1px solid var(--border-strong); }
+.tbl th:first-child, .tbl td:first-child { padding-left: 0; }
+.tbl th:last-child, .tbl td:last-child { padding-right: 0; }
+.tbl td.num { font-family: var(--ff-n); font-size: 19px; font-weight: 600; letter-spacing: .01em; }
+
+/* Lecturas: una tira continua, no cuatro cajas */
+.kpi-row { gap: 0; border-top: 2px solid var(--text); border-bottom: 1px solid var(--border-strong); }
+.kpi { background: transparent; border: 0; border-left: 1px solid var(--border-strong); border-radius: 0; box-shadow: none; padding: 14px 18px 13px; }
+.kpi:first-child { border-left: 0; padding-left: 0; }
+.kpi::after { display: none; }
+.kpi .top .ic { display: none; }
+.kpi .lbl { font-family: var(--ff-m); font-size: 10px; font-weight: 500; letter-spacing: .09em; text-transform: uppercase; }
+.kpi .val { font-family: var(--ff-n); font-weight: 600; font-size: 72px; line-height: .84; letter-spacing: -.012em; margin-top: 12px; }
+.kpi .val .u { font-size: .4em; font-weight: 500; letter-spacing: 0; margin-left: 4px; color: var(--text-2); }
+.kpi .hint { margin-top: 10px; }
+.kpi-link:hover { transform: none; box-shadow: none; background: color-mix(in srgb, var(--text) 4%, transparent); }
+@media (max-width: 1100px) {
+  .kpi:nth-child(odd) { border-left: 0; padding-left: 0; }
+  .kpi:nth-child(n+3) { border-top: 1px solid var(--border-strong); }
+}
+
+/* Estados: LED + mono, sin pastilla */
+.badge { background: none; padding: 0; border-radius: 0; gap: 6px; font-family: var(--ff-m); font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--tone, var(--text-2)); }
+.badge::before { content: ""; width: 7px; height: 7px; background: currentColor; flex: none; }
+.badge .dot { display: none; }
+.chip { border-radius: 0; background: transparent; border: 1px solid var(--border-strong); font-family: var(--ff-m); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; }
+.chip.on { background: var(--text); border-color: var(--text); color: var(--bg); }
+
+/* Pestañas subrayadas */
+.seg { background: none; padding: 0; gap: 18px; border-radius: 0; }
+.seg button { padding: 0 1px 7px; height: auto; border-radius: 0; border-bottom: 2px solid transparent; font-family: var(--ff-m); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; }
+.seg button.on { background: none; box-shadow: none; border-bottom-color: var(--text); color: var(--text); }
+
+/* Botones y campos */
+.btn { font-family: var(--ff-m); font-size: 10.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.btn.sm { font-size: 10px; }
+.btn.primary { background: var(--text); color: var(--bg); }
+.btn.primary:hover:not(:disabled) { background: var(--brand); color: #fff; }
+.btn.secondary { background: transparent; border: 1px solid var(--text); }
+.btn.secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 6%, transparent); }
+.search, .sel, .field input, .field select, .field textarea { border-radius: 0; background-color: transparent; border: 0; border-bottom: 1px solid var(--text); padding-left: 2px; }
+.search:focus-within { box-shadow: none; border-bottom: 2px solid var(--brand); }
+.field label { font-family: var(--ff-m); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+
+/* Renglones de bitácora */
+.mcards { gap: 0; border-top: 1px solid var(--text); }
+.mcard { background: transparent; border: 0; border-bottom: 1px solid var(--border-strong); border-radius: 0; box-shadow: none; padding: 14px 0; }
+.mcard::before { display: none; }
+.mcard:hover { transform: none; box-shadow: none; border-color: var(--border-strong); background: color-mix(in srgb, var(--text) 4%, transparent); }
+.mcard.selected { box-shadow: none; border-color: var(--border-strong); background: var(--brand-soft); }
+.mcard .mc-title { font-size: 15px; font-weight: 700; }
+.mcard .mc-sub { font-family: var(--ff-m); font-size: 10px; letter-spacing: .03em; text-transform: uppercase; margin-top: 4px; }
+.mcard .mc-right .big { font-family: var(--ff-n); font-size: 32px; font-weight: 600; }
+.icon-tile { background: transparent; border: 1px solid currentColor; border-radius: 0; }
+.card-body.mcards { padding: 0; border-top: 0; }
+
+/* Navegación */
+.nav .group-label { font-family: var(--ff-m); font-weight: 500; }
+.nav a { border-radius: 0; }
+.nav a.active { background: none; color: var(--text); font-weight: 700; }
+.nav a.active::before { top: 0; bottom: 0; border-radius: 0; background: var(--brand); }
+.nav a .count { border-radius: 0; background: none; font-family: var(--ff-m); font-size: 10.5px; padding: 0; }
+.nav a.active .count { background: none; color: var(--text); }
+.nav a .count.danger { background: none; color: var(--danger); }
+.brand b { font-family: var(--ff-n); font-weight: 700; font-size: 30px; letter-spacing: .01em; line-height: .8; }
+.brand small { font-family: var(--ff-m); }
+
+/* Placa de identificación (encabezado de ficha) */
+.hero { background: radial-gradient(circle, var(--text-3) 1.5px, transparent 2.3px) right 5px top 5px / 9px 9px no-repeat, radial-gradient(circle, var(--text-3) 1.5px, transparent 2.3px) right 5px bottom 5px / 9px 9px no-repeat, var(--surface); color: var(--text); border: 1.5px solid var(--text); border-radius: 3px; box-shadow: none; padding: 14px 18px 14px 22px; }
+.hero::after { display: none; }
+.hero::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 7px; background: var(--h2, var(--brand)); }
+.hero .h-ic { background: none; box-shadow: none; backdrop-filter: none; border: 1px solid var(--border-strong); border-radius: 0; color: var(--text); }
+.hero .h-kicker { opacity: 1; color: var(--text-2); font-size: 10px; }
+.hero .h-title { font-family: var(--ff-n); font-weight: 700; font-size: 31px; line-height: .92; letter-spacing: .004em; text-transform: uppercase; margin-top: 5px; }
+.hero .h-sub { font-family: var(--ff-m); font-size: 10px; letter-spacing: .03em; text-transform: uppercase; opacity: 1; color: var(--text-2); margin-top: 7px; }
+.hero .h-ghost { opacity: .07; }
+.drawer-head h3 { font-family: var(--ff-n); font-weight: 700; font-size: 24px !important; text-transform: uppercase; line-height: .95; letter-spacing: .004em; }
+
+.vt { border-radius: 2px; }
+.cert-card, .task, .selbar, .tarea-add .search { border-radius: 2px; }
+
+@media (max-width: 760px) {
+  .page-head h1 { font-size: 40px; }
+  .kpi { padding: 12px 12px 11px; }
+  .kpi .val { font-size: 58px; }
+  .seg button { min-height: 40px; height: auto; padding-top: 12px; }
+  .tbl.cards tbody { gap: 0; }
+  .tbl.cards tr { background: transparent; border: 0; border-bottom: 1px solid var(--border-strong); border-radius: 0; box-shadow: none; padding: 13px 0; }
+  .tbl.cards tr.selected { box-shadow: none; background: var(--brand-soft); }
+  .tbl.cards td:first-child { border-bottom: 0; margin-bottom: 2px; padding-bottom: 4px; }
+  .card:has(.tbl.cards) { border-top: 1px solid var(--text); }
+  .bottom-nav a { border-radius: 0; font-family: var(--ff-m); font-size: 9px; letter-spacing: .04em; text-transform: uppercase; }
+  .bottom-nav a.active { background: none; color: var(--text); }
+  .bottom-nav a.active::before { left: 0; transform: none; width: 100%; height: 2px; border-radius: 0; background: var(--text); top: -7px; }
+  .hero .h-title { font-size: 27px; }
+}
+
+/* Ajustes del lenguaje "placa y planilla" */
+.page-head + .card.pad { border-top: 0; padding-top: 0; }
+.qr-label { width: 100%; border-radius: 2px; }
+@media (max-width: 760px) {
+  .drawer { border-radius: 4px 4px 0 0; }
+  .hero .h-ghost { display: none; }
 }
