@@ -11,37 +11,48 @@ export default function Auditoria() {
   const { db } = useStore()
   const [q, setQ] = useState('')
   const selection = useSelection()
-  const hora = (iso: string) => new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+  const hora = (iso: string) => new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })
   const rows = useMemo(() => {
     const n = normalize(q)
     return n ? db.auditoria.filter((a) => normalize(`${a.usuario} ${a.accion} ${a.detalle}`).includes(n)) : db.auditoria
   }, [db.auditoria, q])
+  const dias = useMemo(() => {
+    const m = new Map<string, typeof rows>()
+    for (const a of rows) { const k = a.fechaISO.slice(0, 10); (m.get(k) ?? m.set(k, []).get(k)!).push(a) }
+    return [...m]
+  }, [rows])
 
   return (
-    <Page title="Auditoría" sub="Registro de acciones de la plataforma"
+    <Page title="Auditoría" sub={`Bitácora de la plataforma · ${db.auditoria.length} asientos`}
       actions={<SelectToggle on={selection.on} onToggle={() => (selection.on ? selection.exit() : selection.setOn(true))} />}>
       {db.auditoria.length > 0 && (
         <div className="card pad"><label className="search"><Search size={16} /><input placeholder="Buscar por usuario, acción o detalle…" value={q} onChange={(e) => setQ(e.target.value)} /></label></div>
       )}
-      <div className="card">
-        {rows.length === 0 ? <EmptyState /> : (
-          <div className="tbl-wrap">
-            <table className="tbl cards">
-              <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead>
-              <tbody>
-                {rows.map((a) => (
-                  <tr key={a.id} className={`${selection.on ? 'selectable' : ''} ${selection.has(a.id) ? 'selected' : ''}`} onClick={selection.on ? () => selection.toggle(a.id) : undefined}>
-                    <td className="mono small faint"><div className="sel-head">{selection.on && <SelectBox checked={selection.has(a.id)} />}<span>{fecha(a.fechaISO)} {hora(a.fechaISO)}</span></div></td>
-                    <td className="mono small">{a.usuario}</td>
-                    <td className="row-strong">{a.accion}</td>
-                    <td className="muted">{a.detalle}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {rows.length === 0 ? <div className="card"><EmptyState /></div> : (
+        <div className="bt">
+          {dias.map(([dia, list]) => {
+            const d = new Date(list[0].fechaISO)
+            return (
+              <section key={dia} className="bt-day">
+                <header className="bt-date">
+                  <b>{String(d.getDate()).padStart(2, '0')}</b>
+                  <span>{d.toLocaleDateString('es-AR', { month: 'short' }).replace('.', '')} {d.getFullYear()}</span>
+                  <small>{d.toLocaleDateString('es-AR', { weekday: 'long' })} · {list.length} asiento{list.length === 1 ? '' : 's'}</small>
+                </header>
+                <ol className="bt-list">
+                  {list.map((a) => (
+                    <li key={a.id} className={`${selection.on ? 'selectable' : ''} ${selection.has(a.id) ? 'selected' : ''}`} onClick={selection.on ? () => selection.toggle(a.id) : undefined}>
+                      <time>{hora(a.fechaISO)}</time>
+                      {selection.on ? <SelectBox checked={selection.has(a.id)} /> : <span className="bt-ini">{a.usuario.split(/[.\s]/).map((x) => x.charAt(0).toUpperCase()).join('').slice(0, 2)}</span>}
+                      <div><b>{a.accion}</b><p>{a.detalle}</p><small>{a.usuario}</small></div>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            )
+          })}
+        </div>
+      )}
       {selection.on && (
         <SelectionBar count={selection.size} total={rows.length}
           onAll={() => selection.selectMany(rows.map((a) => a.id))}

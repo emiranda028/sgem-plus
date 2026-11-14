@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { Page } from '../components/Layout'
-import { Badge, EmptyState } from '../components/ui'
+import { EmptyState } from '../components/ui'
 import { ROLE_LABEL, useStore } from '../lib/store'
 
 const CATS = [
@@ -24,39 +24,34 @@ export default function Configuracion() {
     return db.usuarios.map((u) => ({ a: `${u.nombre} ${u.apellido}`, b: u.email, c: ROLE_LABEL[u.rol] }))
   }, [db, cat])
 
+  const cuenta = {
+    tipos: new Set(db.equipos.map((e) => e.tipo)).size, fabricantes: new Set(db.equipos.map((e) => e.fabricante)).size,
+    servicios: db.servicios.length, talleres: db.talleres.length, usuarios: db.usuarios.length,
+  }
+
   return (
     <Page title="Configuración" sub="Catálogos, usuarios y datos de demostración"
       actions={<button className="btn secondary" onClick={() => resetDemo()}><RotateCcw size={16} /> Restablecer demo</button>}>
-      <div className="cfg-grid">
-        <div className="card pad" style={{ display: 'grid', gap: 2 }}>
-          {CATS.map((c) => (
-            <button key={c.key} className={`nav-item ${cat === c.key ? 'on' : ''}`} onClick={() => setCat(c.key)}
-              ref={cat === c.key ? (el) => el?.scrollIntoView({ block: 'nearest', inline: 'center' }) : undefined}
-              style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 'var(--radius)', fontWeight: 600, fontSize: 13.5, background: cat === c.key ? 'var(--brand-soft)' : 'transparent', color: cat === c.key ? 'var(--brand)' : 'var(--text-2)' }}>
-              {c.label}
-            </button>
-          ))}
-        </div>
-        <div className="card">
-          <div className="card-head"><h3>{CATS.find((c) => c.key === cat)?.label}</h3><span className="faint small">{data.length} registros</span></div>
-          {data.length === 0 ? <EmptyState /> : (
-            <div className="tbl-wrap">
-              <table className="tbl cards">
-                <tbody>
-                  {data.map((r, i) => (
-                    <tr key={i} style={{ cursor: 'default' }}>
-                      <td className="row-strong">{r.a}</td>
-                      <td className="muted">{r.b}</td>
-                      {r.c && <td style={{ textAlign: 'right' }}><Badge tone={r.c === 'ALTA' ? 'danger' : r.c === 'MEDIA' ? 'warn' : 'brand'}>{r.c}</Badge></td>}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+      <div className="cf-tabs">
+        {CATS.map((c) => (
+          <button key={c.key} className={cat === c.key ? 'on' : ''} onClick={() => setCat(c.key)}
+            ref={cat === c.key ? (el) => el?.scrollIntoView({ block: 'nearest', inline: 'center' }) : undefined}>
+            {c.label}<b>{String(cuenta[c.key]).padStart(2, '0')}</b>
+          </button>
+        ))}
       </div>
-      <p className="faint small">Esta es una demostración con datos ficticios que viven en tu navegador. Al conectar el backend real, estos catálogos se vuelven editables y se sincronizan.</p>
+      {data.length === 0 ? <div className="card"><EmptyState /></div> : (
+        <ol className="cf-list">
+          {data.map((r, i) => (
+            <li key={i}>
+              <em>{String(i + 1).padStart(2, '0')}</em>
+              <div><b>{r.a}</b><small>{r.b}</small></div>
+              {r.c && <span className={`badge ${r.c === 'ALTA' ? 'tone-danger' : r.c === 'MEDIA' ? 'tone-warn' : ''}`}>{r.c}</span>}
+            </li>
+          ))}
+        </ol>
+      )}
+      <p className="tn-foot">Esta es una demostración con datos ficticios que viven en tu navegador. Al conectar el backend real, estos catálogos se vuelven editables y se sincronizan.</p>
     </Page>
   )
 }

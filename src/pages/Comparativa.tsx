@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { BarChart3, Building2, ShieldCheck, Stethoscope, Wrench } from 'lucide-react'
 import { Page } from '../components/Layout'
 import { Kpi } from '../components/ui'
@@ -13,7 +12,6 @@ type Row = {
   certPct: number | null; prevPct: number | null
 }
 
-const pctColor = (v: number | null) => v == null ? 'var(--text-3)' : v >= 70 ? 'var(--ok)' : v >= 40 ? 'var(--warn)' : 'var(--danger)'
 
 const METRICAS = [
   { key: 'certPct', label: '% Certificación vigente', suffix: '%' },
@@ -49,8 +47,10 @@ export default function Comparativa() {
     return all.length ? Math.round(all.filter((x) => vigencia(x.vencimientoISO) === 'VIGENTE').length / all.length * 100) : 0
   })()
 
-  const chart = useMemo(() => [...rows].sort((a, b) => (Number(b[metric] ?? -1)) - (Number(a[metric] ?? -1))).map((r) => ({ name: r.corto, value: r[metric] ?? 0, isPct: metric === 'certPct' || metric === 'prevPct' })), [rows, metric])
-  const activa = METRICAS.find((m) => m.key === metric)!
+  const orden = useMemo(() => [...rows].sort((a, b) => (Number(b[metric] ?? -1)) - (Number(a[metric] ?? -1))), [rows, metric])
+  const maxEq = Math.max(1, ...rows.map((r) => r.equipos))
+  const maxVen = Math.max(1, ...rows.map((r) => r.vencidos))
+  const tono = (v: number | null) => (v == null ? 'na' : v >= 80 ? 'ok' : v >= 50 ? 'warn' : 'danger')
 
   const download = () => exportCsv('comparativa-clientes.csv', rows.map((r) => ({
     Cliente: r.nombre, Equipos: r.equipos, CertificacionVigentePct: r.certPct ?? '', PreventivoAlDiaPct: r.prevPct ?? '', Vencidos: r.vencidos, EnTaller: r.enTaller, OrdenesAbiertas: r.abiertas,
@@ -62,53 +62,36 @@ export default function Comparativa() {
       <div className="kpi-row">
         <Kpi label="Clientes" value={rows.length} tone="brand" icon={<Building2 size={18} />} />
         <Kpi label="Equipos totales" value={tot.equipos} tone="info" icon={<Stethoscope size={18} />} hint={`${tot.enTaller} en taller`} />
-        <Kpi label="Certificación vigente (global)" value={`${certGlobal}%`} tone={certGlobal >= 70 ? 'ok' : certGlobal >= 40 ? 'warn' : 'danger'} icon={<ShieldCheck size={18} />} />
+        <Kpi label="Certificación vigente (global)" value={`${certGlobal}%`} tone={certGlobal >= 80 ? 'ok' : certGlobal >= 50 ? 'warn' : 'danger'} icon={<ShieldCheck size={18} />} />
         <Kpi label="Vencimientos vencidos" value={tot.vencidos} tone={tot.vencidos ? 'danger' : 'ok'} icon={<Wrench size={18} />} hint={`${tot.abiertas} órdenes abiertas`} />
       </div>
 
-      <div className="card">
-        <div className="card-head">
-          <h3>Comparar por</h3>
+      <section className="cp">
+        <div className="cp-top">
+          <span>Tabla de posiciones · ordenar por</span>
           <div className="seg">
-            {METRICAS.map((m) => <button key={m.key} className={metric === m.key ? 'on' : ''} onClick={() => setMetric(m.key)}>{m.label.replace('% ', '').replace(' vigente', '').replace(' al día', '')}</button>)}
+            {METRICAS.map((m) => <button key={m.key} className={metric === m.key ? 'on' : ''} onClick={() => setMetric(m.key)}>{m.label.replace('% ', '').replace(' vigente', '').replace(' al día', '').replace('Vencimientos vencidos', 'Vencidos')}</button>)}
           </div>
         </div>
-        <div className="card-body">
-          <div className="faint small" style={{ marginBottom: 10 }}>{activa.label}</div>
-          <ResponsiveContainer width="100%" height={Math.max(160, rows.length * 42)}>
-            <BarChart data={chart} layout="vertical" margin={{ left: 8, right: 36, top: 4, bottom: 4 }}>
-              <XAxis type="number" domain={metric === 'certPct' || metric === 'prevPct' ? [0, 100] : [0, 'dataMax']} tick={{ fontSize: 11, fill: 'var(--text-3)' }} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" width={64} tick={{ fontSize: 12, fill: 'var(--text-2)' }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v: number) => [`${v}${activa.suffix}`, activa.label]} contentStyle={{ borderRadius: 'var(--radius)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 12 }} cursor={{ fill: 'var(--surface-3)' }} />
-              <Bar dataKey="value" radius={[0, 5, 5, 0]} label={{ position: 'right', fontSize: 11, fill: 'var(--text-2)', formatter: (v: number) => `${v}${activa.suffix}` }}>
-                {chart.map((d, i) => <Cell key={i} fill={d.isPct ? pctColor(d.value) : metric === 'vencidos' ? (d.value > 0 ? 'var(--danger)' : 'var(--ok)') : 'var(--brand)'} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="card">
-        <div className="card-head"><h3>Detalle por cliente</h3><span className="faint small">Tocá un cliente para abrirlo</span></div>
-        <div className="tbl-wrap">
-          <table className="tbl">
-            <thead><tr><th>Cliente</th><th className="num">Equipos</th><th className="num">Cert.</th><th className="num">Prev.</th><th className="num">Vencidos</th><th className="num">En taller</th><th className="num">OS abiertas</th></tr></thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.id} onClick={() => setCliente(db.clientes.find((c) => c.id === r.id) ?? null)}>
-                  <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}><span style={{ width: 26, height: 26, borderRadius: 'var(--radius)', background: r.color, color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 700, flex: 'none', fontFamily: 'var(--ff-d)' }}>{r.corto.slice(0, 3)}</span><span className="row-strong">{r.nombre}</span></div></td>
-                  <td className="num mono">{r.equipos}</td>
-                  <td className="num mono" style={{ color: pctColor(r.certPct), fontWeight: 700 }}>{r.certPct == null ? '—' : `${r.certPct}%`}</td>
-                  <td className="num mono" style={{ color: pctColor(r.prevPct), fontWeight: 700 }}>{r.prevPct == null ? '—' : `${r.prevPct}%`}</td>
-                  <td className="num mono" style={{ color: r.vencidos ? 'var(--danger)' : 'var(--text-3)', fontWeight: r.vencidos ? 700 : 400 }}>{r.vencidos}</td>
-                  <td className="num mono">{r.enTaller || <span className="faint">0</span>}</td>
-                  <td className="num mono">{r.abiertas || <span className="faint">0</span>}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <div className="cp-head"><span /><span>Cliente</span><span>Certificación</span><span>Preventivo</span><span>Vencidos</span><span>Equipos</span><span>Taller</span><span>OS</span></div>
+        {orden.map((r, i) => (
+          <button key={r.id} className="cp-row" onClick={() => setCliente(db.clientes.find((c) => c.id === r.id) ?? null)}>
+            <em>{String(i + 1).padStart(2, '0')}</em>
+            <div className="cp-cli"><span style={{ background: r.color }}>{r.corto.slice(0, 3)}</span><b>{r.nombre}</b></div>
+            {([['Certificación', r.certPct, 'certPct'], ['Preventivo', r.prevPct, 'prevPct']] as const).map(([lbl, v, k]) => (
+              <div key={k} className={`cp-m ${tono(v)} ${metric === k ? 'act' : ''}`} data-l={lbl}>
+                <b>{v == null ? '—' : v}{v != null && <small>%</small>}</b>
+                <i><u style={{ width: `${v ?? 0}%` }} /></i>
+              </div>
+            ))}
+            <div className={`cp-m ${r.vencidos ? 'danger' : 'ok'} ${metric === 'vencidos' ? 'act' : ''}`} data-l="Vencidos"><b>{r.vencidos}</b><i className="plain"><u style={{ width: `${(r.vencidos / maxVen) * 100}%` }} /></i></div>
+            <div className={`cp-m ink ${metric === 'equipos' ? 'act' : ''}`} data-l="Equipos"><b>{r.equipos}</b><i className="plain"><u style={{ width: `${(r.equipos / maxEq) * 100}%` }} /></i></div>
+            <div className="cp-n" data-l="Taller"><b>{r.enTaller}</b></div>
+            <div className="cp-n" data-l="OS"><b>{r.abiertas}</b></div>
+          </button>
+        ))}
+        <p className="tn-foot" style={{ marginTop: 12 }}>La marca en las barras de porcentaje es el objetivo de 80 %. Tocá un cliente para abrirlo.</p>
+      </section>
     </Page>
   )
 }

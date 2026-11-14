@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import { Bell, Mail, Plus, Send, X } from 'lucide-react'
+import { Mail, Plus, Send, X } from 'lucide-react'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
-import { Badge, EmptyState } from '../components/ui'
+import { EmptyState } from '../components/ui'
 import { useAlertas, useStore } from '../lib/store'
 import { fecha } from '../lib/format'
 
@@ -45,89 +45,64 @@ function Notificaciones({ clienteId }: { clienteId: number }) {
   return (
     <Page title="Notificaciones" sub={`${cliente?.nombre} · avisos de vencimiento por mail`}
       actions={<button className="btn primary" onClick={() => setPreview(true)} disabled={!resumen.total}><Send size={16} /> Enviar resumen ahora</button>}>
-      <div className="grid-2">
-        <div className="card">
-          <div className="card-head"><h3>Configuración de alertas</h3></div>
-          <div className="card-body" style={{ display: 'grid', gap: 18 }}>
-            <div className="field">
-              <label>Avisar con anticipación</label>
-              <div className="filters">
-                {[15, 30, 60, 90].map((d) => (
-                  <button key={d} className={`chip ${cfg.anticipacion === d ? 'on' : ''}`} onClick={() => saveCfg({ ...cfg, anticipacion: d })}>{d} días</button>
-                ))}
-              </div>
-            </div>
-            <div className="field">
-              <label>Destinatarios</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-                {cfg.destinatarios.map((e) => (
-                  <span key={e} className="chip">{e}<button className="icon-btn" style={{ width: 18, height: 18 }} onClick={() => saveCfg({ ...cfg, destinatarios: cfg.destinatarios.filter((x) => x !== e) })}><X size={12} /></button></span>
-                ))}
-                {cfg.destinatarios.length === 0 && <span className="faint small">Agregá al menos un correo.</span>}
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input className="search" style={{ flex: 1 }} placeholder="correo@ejemplo.com" value={nuevo} onChange={(e) => setNuevo(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addDest()} />
-                <button className="btn secondary" onClick={addDest}><Plus size={16} /></button>
-              </div>
-            </div>
-            <div className="card pad" style={{ background: 'var(--surface-2)', display: 'flex', gap: 10, alignItems: 'center' }}>
-              <Bell size={18} style={{ color: 'var(--brand)' }} />
-              <span className="small muted">Se envía un resumen automático cada lunes y un aviso cuando un vencimiento entra en la ventana de {cfg.anticipacion} días.</span>
-            </div>
+      <div className="nt-grid">
+        <section className="nt">
+          <div className="rp-top"><span>Regla de aviso</span><span><b>{cfg.anticipacion}</b> días antes</span></div>
+          <div className="nt-regla" role="radiogroup" aria-label="Anticipación del aviso">
+            {[15, 30, 60, 90].map((d) => (
+              <button key={d} role="radio" aria-checked={cfg.anticipacion === d} className={`${cfg.anticipacion === d ? 'on' : ''} ${d <= cfg.anticipacion ? 'in' : ''}`} onClick={() => saveCfg({ ...cfg, anticipacion: d })}><i /><b>{d}</b><small>días</small></button>
+            ))}
           </div>
-        </div>
+          <p className="nt-note">Resumen automático cada lunes y aviso cuando un vencimiento entra en la ventana de {cfg.anticipacion} días.</p>
 
-        <div className="card">
-          <div className="card-head"><h3>Vista previa del mail</h3><Badge tone={resumen.vencidos.length ? 'danger' : 'ok'}>{resumen.total} ítems</Badge></div>
-          <div className="card-body">
-            <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
-              <div style={{ background: 'var(--brand)', color: '#fff', padding: '16px 18px' }}>
-                <div style={{ fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 18 }}>SGEM Plus · Vencimientos</div>
-                <div style={{ opacity: .85, fontSize: 13 }}>{cliente?.nombre}</div>
-              </div>
-              <div style={{ padding: 16, display: 'grid', gap: 10 }}>
-                <p className="small muted" style={{ margin: 0 }}>Hola equipo, este es el estado del equipamiento para los próximos {cfg.anticipacion} días:</p>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 10, textAlign: 'center' }}>
-                    <div style={{ fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 22, color: 'var(--danger)' }}>{resumen.vencidos.length}</div>
-                    <div className="faint small">Vencidos</div>
-                  </div>
-                  <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 10, textAlign: 'center' }}>
-                    <div style={{ fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 22, color: 'var(--warn)' }}>{resumen.porVencer.length}</div>
-                    <div className="faint small">Por vencer</div>
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gap: 5 }}>
-                  {[...resumen.vencidos, ...resumen.porVencer].slice(0, 5).map((a, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 12.5, paddingBottom: 5, borderBottom: '1px solid var(--border)' }}>
-                      <span>{a.tipo} · {a.equipo}</span>
-                      <span className="mono faint">{fecha(a.vencimientoISO)}</span>
-                    </div>
-                  ))}
-                  {resumen.total > 5 && <span className="faint small">y {resumen.total - 5} más…</span>}
-                  {resumen.total === 0 && <span className="faint small">Todo al día. Sin vencimientos en la ventana.</span>}
-                </div>
-              </div>
-            </div>
+          <div className="rp-top" style={{ marginTop: 26 }}><span>Destinatarios</span><span><b>{cfg.destinatarios.length}</b></span></div>
+          <ol className="nt-dest">
+            {cfg.destinatarios.map((e, i) => (
+              <li key={e}><em>{String(i + 1).padStart(2, '0')}</em><span>{e}</span><button className="icon-btn" aria-label={`Quitar ${e}`} onClick={() => saveCfg({ ...cfg, destinatarios: cfg.destinatarios.filter((x) => x !== e) })}><X size={14} /></button></li>
+            ))}
+            {cfg.destinatarios.length === 0 && <li className="vacio">Agregá al menos un correo.</li>}
+          </ol>
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <input className="search" style={{ flex: 1 }} placeholder="correo@ejemplo.com" value={nuevo} onChange={(e) => setNuevo(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addDest()} />
+            <button className="btn secondary" onClick={addDest} aria-label="Agregar destinatario"><Plus size={16} /></button>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <div className="card">
-        <div className="card-head"><h3>Historial de envíos</h3><span className="faint small">{historial.length}</span></div>
-        {historial.length === 0 ? <EmptyState icon={<Mail size={22} />}>Todavía no se enviaron notificaciones.</EmptyState> : (
-          <div className="tbl-wrap">
-            <table className="tbl cards"><tbody>
-              {historial.map((h) => (
-                <tr key={h.id} style={{ cursor: 'default' }}>
-                  <td className="mono small faint" style={{ whiteSpace: 'nowrap' }}>{fecha(h.fechaISO)} {new Date(h.fechaISO).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}</td>
-                  <td>{h.detalle}</td>
-                </tr>
+        <section className="nt">
+          <div className="rp-top"><span>Así llega el mail</span><span><b>{resumen.total}</b> ítems</span></div>
+          <article className="nt-mail">
+            <dl>
+              <dt>De</dt><dd>SGEM Plus · avisos</dd>
+              <dt>Para</dt><dd>{cfg.destinatarios.join(', ') || '—'}</dd>
+              <dt>Asunto</dt><dd>Vencimientos · {cliente?.nombre}</dd>
+            </dl>
+            <h4>Parte de vencimientos</h4>
+            <p>Estado del equipamiento de {cliente?.nombre} para los próximos {cfg.anticipacion} días.</p>
+            <div className="nt-nums">
+              <div className="d"><b>{resumen.vencidos.length}</b><span>Vencidos</span></div>
+              <div className="w"><b>{resumen.porVencer.length}</b><span>Por vencer</span></div>
+            </div>
+            <ul>
+              {[...resumen.vencidos, ...resumen.porVencer].slice(0, 5).map((a, i) => (
+                <li key={i}><i className={a.estado === 'VENCIDO' ? 'd' : 'w'} /><span>{a.tipo} · {a.equipo}</span><time>{fecha(a.vencimientoISO)}</time></li>
               ))}
-            </tbody></table>
-          </div>
-        )}
+              {resumen.total > 5 && <li className="mas">y {resumen.total - 5} más en el informe adjunto</li>}
+              {resumen.total === 0 && <li className="mas">Todo al día. Sin vencimientos en la ventana.</li>}
+            </ul>
+          </article>
+        </section>
       </div>
+
+      <section className="nt">
+        <div className="rp-top"><span>Historial de envíos</span><span><b>{historial.length}</b></span></div>
+        {historial.length === 0 ? <EmptyState icon={<Mail size={22} />}>Todavía no se enviaron notificaciones.</EmptyState> : (
+          <ol className="nt-hist">
+            {historial.map((h) => (
+              <li key={h.id}><time>{fecha(h.fechaISO)} · {new Date(h.fechaISO).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false })}</time><span>{h.detalle}</span></li>
+            ))}
+          </ol>
+        )}
+      </section>
 
       {preview && (
         <>

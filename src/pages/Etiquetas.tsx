@@ -37,29 +37,24 @@ function Etiquetas({ clienteId }: { clienteId: number }) {
           <button className="btn primary" onClick={() => window.print()} disabled={!aImprimir.length}><Printer size={16} /> Imprimir ({aImprimir.length})</button>
         </div>
       }>
-      <div className="card pad no-print" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <QrCode size={18} style={{ color: 'var(--brand)' }} />
-        <span className="muted">{sel.size ? `${sel.size} seleccionados` : `Se imprimirán los ${equipos.length} equipos`}. Tocá una tarjeta para elegir cuáles.</span>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-          <button className="btn secondary sm" onClick={todos}>Seleccionar todos</button>
-          <button className="btn ghost sm" onClick={ninguno}>Limpiar</button>
-        </div>
+      <div className="et-top no-print">
+        <span><b>{aImprimir.length}</b> etiqueta{aImprimir.length === 1 ? '' : 's'} · <b>{Math.max(1, Math.ceil(aImprimir.length / 24))}</b> hoja{aImprimir.length > 24 ? 's' : ''} A4 · {sel.size ? 'selección manual' : 'todo el filtro'}</span>
+        <span className="et-acc"><button onClick={todos}>Seleccionar todas</button><button onClick={ninguno} disabled={!sel.size}>Limpiar</button></span>
       </div>
-
       {equipos.length === 0 ? <div className="card"><EmptyState icon={<QrCode size={22} />}>No hay equipos para este filtro.</EmptyState></div> : (
         <div className="labels-grid">
           {equipos.map((e) => {
             const on = sel.has(e.id)
             return (
-              <button key={e.id} className="ql" onClick={() => toggle(e.id)} style={{ position: 'relative', textAlign: 'left', borderColor: on ? 'var(--brand)' : undefined, boxShadow: on ? '0 0 0 2px var(--brand-soft)' : undefined }}>
-                {on && <span className="no-print" style={{ position: 'absolute', top: 6, right: 6, width: 18, height: 18, borderRadius: '50%', background: 'var(--brand)', color: '#fff', display: 'grid', placeItems: 'center' }}><Check size={12} /></span>}
+              <button key={e.id} className={`ql ${on ? 'on' : ''} ${sel.size && !on ? 'no-print' : ''}`} onClick={() => toggle(e.id)}>
+                {on && <span className="ql-ok no-print"><Check size={12} /></span>}
                 <Qr text={e.qr} size={78} />
                 <div className="qm">
+                  <div className="code">{e.qr}</div>
                   <div className="t">{e.tipo}</div>
                   <div className="s">{e.fabricante} {e.modelo}</div>
                   <div className="s">S/N {e.serie}</div>
                   <div className="s">{servName(e.servicioId)}</div>
-                  <div className="code">{e.qr}</div>
                 </div>
               </button>
             )
