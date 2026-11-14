@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Award, Camera, CheckCircle2, Circle, CircleDot, ClipboardCheck, Clock, Download, FileSignature, Plus, Search, Trash2, UserRound, X } from 'lucide-react'
 import { plantillaProtocolo } from '../lib/protocolos'
 import { certificadoPDF, informeEnsayoPDF, remitoPDF } from '../lib/pdf'
@@ -10,6 +11,7 @@ import { Badge, EmptyState, IconTile, iconOS, useIsMobile } from '../components/
 import { SelectBox, SelectToggle, SelectionBar, useSelection } from '../components/Selection'
 import { exportCsv, shareSelectionImage } from '../lib/share'
 import Signature from '../components/Signature'
+import Recorrido, { RecorridoMini } from '../components/Recorrido'
 import { useStore } from '../lib/store'
 import { clean, diasDesde, diasHasta, fecha, normalize } from '../lib/format'
 import type { OrdenServicio, SituacionOS, TipoOS } from '../lib/types'
@@ -31,7 +33,8 @@ function Ordenes({ clienteId }: { clienteId: number }) {
   const [tab, setTab] = useState<'abiertas' | 'todas'>('abiertas')
   const [tipo, setTipo] = useState('')
   const [q, setQ] = useState('')
-  const [sel, setSel] = useState<OrdenServicio | null>(null)
+  const [params] = useSearchParams()
+  const [sel, setSel] = useState<OrdenServicio | null>(() => db.ordenes.find((o) => o.id === Number(params.get('os')) && o.clienteId === clienteId) ?? null)
   const [nueva, setNueva] = useState(false)
   const puedeEditar = user?.rol !== 'CLIENTE'
   const isMobile = useIsMobile()
@@ -77,7 +80,7 @@ function Ordenes({ clienteId }: { clienteId: number }) {
                   <div className="mc-title">{clean(o.titulo)}</div>
                   <div className="mc-sub">{o.numero} · {o.taller}</div>
                   <div className="mc-chips">
-                    <Badge tone={tone}>{o.situacion}</Badge>
+                    <RecorridoMini situacion={o.situacion} />
                     {o.origen === 'Portal' && <Badge tone="accent">Cliente</Badge>}
                   </div>
                 </div>
@@ -102,7 +105,7 @@ function Ordenes({ clienteId }: { clienteId: number }) {
                       <td><span className="mono small">{o.numero}</span><div className="faint small">{fecha(o.aperturaISO)}</div></td>
                       <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>{selection.on ? <SelectBox checked={selection.has(o.id)} /> : <IconTile icon={iconOS(o.tipo)} tone={situTone(o.situacion)} size={34} />}<div><div className="row-strong">{clean(o.titulo)}</div><div className="faint small">{clean(o.descripcion)}</div></div></div></td>
                       <td>{o.tipo}</td>
-                      <td><Badge tone={situTone(o.situacion)}>{o.situacion}</Badge></td>
+                      <td><RecorridoMini situacion={o.situacion} /></td>
                       <td>{o.taller}</td>
                       <td className="num mono" style={{ color: dias != null && dias > 100 ? 'var(--danger)' : undefined }}>{dias ?? '—'}</td>
                     </tr>
@@ -113,28 +116,24 @@ function Ordenes({ clienteId }: { clienteId: number }) {
           </div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${KANBAN.length}, minmax(220px,1fr))`, gap: 14, overflowX: 'auto' }}>
+        <div className="kb">
           {KANBAN.map((col) => {
             const items = rows.filter((o) => o.situacion === col)
             return (
-              <div key={col} className="card" style={{ background: 'var(--surface-2)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 14px' }}>
-                  <b style={{ fontSize: 13 }}>{col}</b><span className="badge">{items.length}</span>
-                </div>
-                <div style={{ display: 'grid', gap: 8, padding: '0 10px 12px' }}>
-                  {items.map((o) => (
-                    <button key={o.id} className="card pad" style={{ textAlign: 'left', padding: 12 }} onClick={() => setSel(o)}>
-                      <div className="mono small faint">{o.numero}</div>
-                      <div className="row-strong" style={{ fontSize: 13, margin: '3px 0' }}>{clean(o.titulo)}</div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
-                        <Badge tone={o.criticidad === 'ALTA' ? 'danger' : o.criticidad === 'MEDIA' ? 'warn' : 'neutral'}>{o.criticidad}</Badge>
-                        <span className="faint small">{diasDesde(o.aperturaISO)}d</span>
-                      </div>
+              <section key={col} className={`kb-col kb-${situTone(col)}`}>
+                <header><b>{col}</b><span>{String(items.length).padStart(2, '0')}</span></header>
+                {items.map((o) => {
+                  const d = diasDesde(o.aperturaISO) ?? 0
+                  return (
+                    <button key={o.id} className="kb-item" onClick={() => setSel(o)}>
+                      <span className="kb-n">{o.numero}{o.criticidad === 'ALTA' && <em>Crítica</em>}</span>
+                      <span className="kb-t">{clean(o.titulo)}</span>
+                      <span className="kb-f"><span>{o.tecnico}</span><b style={{ color: d > 100 ? 'var(--danger)' : undefined }}>{d}<small>d</small></b></span>
                     </button>
-                  ))}
-                  {items.length === 0 && <div className="faint small" style={{ padding: 8 }}>—</div>}
-                </div>
-              </div>
+                  )
+                })}
+                {items.length === 0 && <div className="kb-empty">Sin órdenes</div>}
+              </section>
             )
           })}
         </div>
@@ -247,8 +246,8 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
               </div>
             </div>
           ) })()}
+          <Recorrido orden={orden} />
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Badge tone={situTone(orden.situacion)}>{orden.situacion}</Badge>
             <Badge tone={orden.criticidad === 'ALTA' ? 'danger' : orden.criticidad === 'MEDIA' ? 'warn' : 'neutral'}>{orden.criticidad}</Badge>
             <Badge>{orden.tipo}</Badge>
             {orden.origen === 'Portal' && <Badge tone="accent">Solicitud del cliente</Badge>}

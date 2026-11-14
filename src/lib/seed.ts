@@ -196,6 +196,13 @@ export function buildSeed(): DB {
     'Calibración requerida',
     'Sensor dañado',
   ]
+  // Visitas programadas para la agenda: sin azar, para no alterar el resto de los datos.
+  const visita = (i: number) => {
+    const d = addDays(today, ((i * 5) % 14) - 5)
+    if (d.getDay() === 0) d.setDate(d.getDate() + 1)
+    d.setHours(8 + (i % 4) * 2, i % 2 ? 30 : 0, 0, 0)
+    return iso(d)
+  }
   for (let i = 0; i < 90; i++) {
     const e = pick(equipos)
     const tipo = pick(tiposOS)
@@ -233,6 +240,29 @@ export function buildSeed(): DB {
       fotos: int(0, 4),
       firmaDataUrl: !abierta && chance(0.5) ? 'signed' : undefined,
       firmante: !abierta && chance(0.5) ? `${pick(NOMBRES)} ${pick(APELLIDOS)}` : undefined,
+      programadaISO: abierta ? visita(i) : undefined,
+    })
+  }
+  // Todo equipo en taller tiene una orden abierta que explica su ingreso.
+  for (const e of equipos) {
+    if (e.estado !== 'EN TALLER' || ordenes.some((o) => o.equipoId === e.id && o.situacion !== 'Cerrada')) continue
+    const n = ordenes.length
+    const apertura = addDays(today, -(6 + ((e.id * 37) % 150)))
+    const tecnico = tecnicos[e.id % tecnicos.length]
+    const situ = (['En taller', 'Esperando repuesto', 'En taller', 'Presupuestar'] as const)[e.id % 4]
+    ordenes.push({
+      id: n + 1,
+      numero: `OS-${apertura.getFullYear()}${String(apertura.getMonth() + 1).padStart(2, '0')}${String(1000 + n)}`,
+      clienteId: e.clienteId, equipoId: e.id, servicioId: e.servicioId,
+      tipo: 'Reparación', titulo: `Reparación: ${e.tipo} ${e.fabricante}`, descripcion: descs[e.id % descs.length],
+      criticidad: e.criticidad, situacion: situ, taller: talleres[e.id % talleres.length], tecnico,
+      aperturaISO: iso(apertura), cierreISO: null,
+      acciones: [
+        { id: 1, fechaISO: iso(apertura), usuario: tecnico, nota: 'Orden abierta. Equipo ingresado a taller.', tipo: 'nota' },
+        { id: 2, fechaISO: iso(apertura), usuario: tecnico, nota: 'Diagnóstico inicial del equipo', tipo: 'tarea', estado: 'hecha', responsable: tecnico },
+      ],
+      fotos: 0,
+      programadaISO: n % 2 ? visita(n) : undefined,
     })
   }
   ordenes.sort((a, b) => b.aperturaISO.localeCompare(a.aperturaISO))
@@ -245,7 +275,7 @@ export function buildSeed(): DB {
   ]
 
   return {
-    version: 6,
+    version: 7,
     usuarios,
     clientes,
     servicios,

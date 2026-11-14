@@ -12,7 +12,7 @@ function loadDB(): DB {
     const raw = localStorage.getItem(DB_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as DB
-      if (parsed.version === 6) return parsed
+      if (parsed.version === 7) return parsed
     }
   } catch { /* ignore */ }
   const seed = buildSeed()
