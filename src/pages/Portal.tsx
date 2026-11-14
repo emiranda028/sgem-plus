@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react'
-import { BadgeCheck, Building2, Download, Eye, Plus, ShieldCheck, Stethoscope, X } from 'lucide-react'
+import { BadgeCheck, Download, Plus, ShieldCheck, Stethoscope, X } from 'lucide-react'
 import { Page } from '../components/Layout'
 import RequireCliente from '../components/RequireCliente'
-import { Badge, EmptyState, Kpi, VigBadge } from '../components/ui'
+import { EmptyState, Kpi } from '../components/ui'
+import EquipoArt, { tieneArt } from '../components/EquipoArt'
+import { ParqueBar, Vence } from '../components/Parque'
+import { RecorridoMini } from '../components/Recorrido'
 import { useStore } from '../lib/store'
 import { certificadoPDF } from '../lib/pdf'
-import { fecha, pct, vigencia } from '../lib/format'
+import { clean, diasDesde, fecha, pct, vigencia } from '../lib/format'
 
 function SolicitudModal({ clienteId, onClose }: { clienteId: number; onClose: () => void }) {
   const { db, addOrden, user } = useStore()
@@ -64,26 +67,22 @@ function Portal({ clienteId }: { clienteId: number }) {
     const certs = db.certificaciones.filter((c) => eqIds.has(c.equipoId))
     const vig = certs.filter((c) => vigencia(c.vencimientoISO) === 'VIGENTE').length
     const conCert = equipos.filter((e) => e.certificable)
-    return { equipos, certs, vig, conCert }
+    const ordenes = db.ordenes.filter((o) => o.clienteId === clienteId && o.situacion !== 'Cerrada').sort((a, b) => b.aperturaISO.localeCompare(a.aperturaISO))
+    return { equipos, certs, vig, conCert, ordenes }
   }, [db, clienteId])
 
   return (
     <Page title="Portal del cliente" sub={esVistaInterna ? 'Vista de lo que ve el cliente (solo lectura)' : undefined}
       actions={!esVistaInterna ? <button className="btn primary" onClick={() => setSolicitar(true)}><Plus size={16} /> Solicitar servicio</button> : undefined}>
-      {esVistaInterna && (
-        <div className="card pad" style={{ display: 'flex', gap: 10, alignItems: 'center', background: 'var(--brand-soft)', borderColor: 'transparent' }}>
-          <Eye size={18} style={{ color: 'var(--brand)' }} />
-          <span style={{ color: 'var(--brand)', fontWeight: 500 }}>Estás viendo el portal tal como lo ve <b>{cliente.nombre}</b>. El cliente solo accede a su propio equipamiento, en modo lectura.</span>
-        </div>
-      )}
+      {esVistaInterna && <div className="pt-aviso"><i />Vista interna · así ve el portal {cliente.nombre}, solo su equipamiento y en modo lectura</div>}
 
-      <div className="card pad" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <span style={{ width: 56, height: 56, borderRadius: 'var(--radius)', background: cliente.color, color: '#fff', display: 'grid', placeItems: 'center', fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 18 }}>{cliente.corto.slice(0, 3)}</span>
-        <div>
-          <h2 style={{ fontSize: 20 }}>{cliente.nombre}</h2>
-          <div className="faint small">{cliente.direccion} · CUIT {cliente.cuit}</div>
+      <div className="hero pt-placa">
+        <span className="h-ic pt-sigla" style={{ background: cliente.color }}>{cliente.corto.slice(0, 3)}</span>
+        <div className="h-body">
+          <div className="h-kicker">Portal del cliente · activo</div>
+          <div className="h-title">{cliente.nombre}</div>
+          <div className="h-sub">{cliente.direccion} · CUIT {cliente.cuit}</div>
         </div>
-        <span className="badge tone-ok" style={{ marginLeft: 'auto' }}><Building2 size={13} /> Portal activo</span>
       </div>
 
       <div className="kpi-row">
@@ -91,6 +90,23 @@ function Portal({ clienteId }: { clienteId: number }) {
         <Kpi label="Operativos" value={`${pct(d.equipos.filter((e) => e.estado === 'OPERATIVO').length, d.equipos.length)}%`} tone="ok" icon={<BadgeCheck size={18} />} />
         <Kpi label="Certificaciones vigentes" value={`${pct(d.vig, d.conCert.length)}%`} tone={pct(d.vig, d.conCert.length) >= 80 ? 'ok' : pct(d.vig, d.conCert.length) >= 50 ? 'warn' : 'danger'} icon={<ShieldCheck size={18} />} />
         <Kpi label="Certificados disponibles" value={d.certs.length} tone="accent" icon={<Download size={18} />} />
+      </div>
+
+      <ParqueBar equipos={d.equipos} />
+
+      <div className="card">
+        <div className="card-head"><h3>Servicios en curso</h3><span className="faint small">{d.ordenes.length} órdenes abiertas</span></div>
+        {d.ordenes.length === 0 ? <EmptyState icon={<BadgeCheck size={22} />}>No hay servicios en curso.</EmptyState> : (
+          <div className="pt-os">
+            {d.ordenes.slice(0, 8).map((o) => (
+              <div key={o.id} className="pt-o">
+                <div><b>{clean(o.titulo)}</b><small>{o.numero} · abierta el {fecha(o.aperturaISO)}{o.origen === 'Portal' ? ' · solicitada por el portal' : ''}</small></div>
+                <RecorridoMini situacion={o.situacion} />
+                <span className="pt-d">{diasDesde(o.aperturaISO)}<small>d</small></span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="card">
@@ -102,12 +118,13 @@ function Portal({ clienteId }: { clienteId: number }) {
               <tbody>
                 {d.equipos.slice(0, 60).map((e) => {
                   const cert = d.certs.find((c) => c.equipoId === e.id)
+                  const et = e.estado === 'OPERATIVO' ? 'ok' : e.estado === 'EN TALLER' ? 'warn' : 'danger'
                   return (
                     <tr key={e.id}>
-                      <td data-label="Equipo"><div className="row-strong">{e.tipo}</div><div className="faint small">{e.fabricante} {e.modelo}</div></td>
+                      <td data-label="Equipo"><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>{tieneArt(e.tipo) && <span className={`eq-thumb t-${et}`}><EquipoArt tipo={e.tipo} size={34} /></span>}<div><div className="row-strong">{e.tipo}</div><div className="faint small">{e.fabricante} {e.modelo}</div></div></div></td>
                       <td data-label="Serie" className="mono small">{e.serie}</td>
-                      <td data-label="Estado"><Badge tone={e.estado === 'OPERATIVO' ? 'ok' : e.estado === 'EN TALLER' ? 'warn' : 'danger'} dot>{e.estado}</Badge></td>
-                      <td data-label="Certificación">{cert ? <VigBadge estado={vigencia(cert.vencimientoISO)} /> : <span className="faint small">No aplica</span>}{cert && <div className="faint small">vence {fecha(cert.vencimientoISO)}</div>}</td>
+                      <td data-label="Estado"><span className={`badge tone-${et}`}>{e.estado}</span></td>
+                      <td data-label="Certificación"><Vence iso={cert?.vencimientoISO} /></td>
                       <td data-label="Certificado">{cert ? <button className="btn secondary sm" onClick={() => certificadoPDF(e, cliente, cert.numero, cert.vencimientoISO)}><Download size={14} /> PDF</button> : <span className="faint small">—</span>}</td>
                     </tr>
                   )

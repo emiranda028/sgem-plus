@@ -5,6 +5,7 @@ import RequireCliente from '../components/RequireCliente'
 import { Badge, EmptyState, EstadoBadge, IconTile, VigBadge, iconEquipo, useIsMobile } from '../components/ui'
 import { Qr } from '../components/Qr'
 import EquipoArt, { tieneArt } from '../components/EquipoArt'
+import { Estante, ParqueBar, Vence } from '../components/Parque'
 import { SelectBox, SelectToggle, SelectionBar, useSelection } from '../components/Selection'
 import { useStore } from '../lib/store'
 import { certificadoPDF } from '../lib/pdf'
@@ -64,6 +65,8 @@ function Lista({ clienteId, readOnly }: { clienteId: number; readOnly?: boolean 
         <SelectToggle on={selection.on} onToggle={() => (selection.on ? selection.exit() : selection.setOn(true))} />
         <button className="btn secondary" onClick={download} disabled={!rows.length}><Download size={16} /> Exportar</button>
       </>}>
+      <ParqueBar equipos={equipos} estado={estado} onEstado={(x) => { setEstado(x); setLimit(PAGE) }} />
+      <Estante equipos={equipos} tipo={tipo} onTipo={(t) => { setTipo(t); setLimit(PAGE) }} />
       <div className="card pad">
         <div className="filters" style={{ marginBottom: 14 }}>
           <label className="search" style={{ flex: '1 1 260px' }}>
@@ -83,7 +86,7 @@ function Lista({ clienteId, readOnly }: { clienteId: number; readOnly?: boolean 
                 const cv = c ? vigencia(c.vencimientoISO) : null
                 return (
                   <button key={e.id} className={`mcard acc-${estadoTone} ${selection.has(e.id) ? 'selected' : ''}`} onClick={() => (selection.on ? selection.toggle(e.id) : setSel(e))}>
-                    {selection.on ? <SelectBox checked={selection.has(e.id)} /> : <IconTile icon={iconEquipo(e.tipo)} tone={estadoTone} size={42} />}
+                    {selection.on ? <SelectBox checked={selection.has(e.id)} /> : <span className={`eq-thumb t-${estadoTone}`}>{tieneArt(e.tipo) ? <EquipoArt tipo={e.tipo} size={38} /> : <IconTile icon={iconEquipo(e.tipo)} tone="neutral" size={38} />}</span>}
                     <div className="mc-body">
                       <div className="mc-title">{e.tipo}</div>
                       <div className="mc-sub">{e.fabricante} {e.modelo} · {servicios.get(e.servicioId)}</div>
@@ -111,12 +114,12 @@ function Lista({ clienteId, readOnly }: { clienteId: number; readOnly?: boolean 
                     const estadoTone = e.estado === 'OPERATIVO' ? 'ok' : e.estado === 'EN TALLER' ? 'warn' : e.estado === 'FUERA DE SERVICIO' ? 'danger' : 'neutral'
                     return (
                       <tr key={e.id} className={selection.has(e.id) ? 'selected' : ''} onClick={() => (selection.on ? selection.toggle(e.id) : setSel(e))}>
-                        <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>{selection.on ? <SelectBox checked={selection.has(e.id)} /> : <IconTile icon={iconEquipo(e.tipo)} tone={estadoTone} size={34} />}<div><div className="row-strong">{e.tipo}</div><div className="faint small">{e.fabricante} · {e.modelo}</div></div></div></td>
+                        <td><div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>{selection.on ? <SelectBox checked={selection.has(e.id)} /> : <span className={`eq-thumb t-${estadoTone}`}>{tieneArt(e.tipo) ? <EquipoArt tipo={e.tipo} size={34} /> : <IconTile icon={iconEquipo(e.tipo)} tone="neutral" size={34} />}</span>}<div><div className="row-strong">{e.tipo}</div><div className="faint small">{e.fabricante} · {e.modelo}</div></div></div></td>
                         <td><span className="mono small">{e.serie}</span></td>
                         <td>{servicios.get(e.servicioId)}</td>
                         <td><EstadoBadge estado={e.estado} /></td>
-                        <td>{c ? <VigBadge estado={vigencia(c.vencimientoISO)} /> : <span className="faint small">No aplica</span>}</td>
-                        <td>{m ? <VigBadge estado={vigencia(m.proximoISO)} /> : <span className="faint small">No aplica</span>}</td>
+                        <td><Vence iso={c?.vencimientoISO} /></td>
+                        <td><Vence iso={m?.proximoISO} /></td>
                         <td style={{ textAlign: 'right' }}><ChevronRight size={17} style={{ color: 'var(--text-3)' }} /></td>
                       </tr>
                     )
