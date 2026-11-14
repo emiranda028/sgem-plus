@@ -184,7 +184,7 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
     if (!equipo || !certNro.trim()) return
     const cert = emitirCertificado(orden.id, equipo.id, { numero: certNro.trim(), meses: certMeses, firmaDataUrl: certFirma || undefined, firmante: certFirmante || undefined, norma: orden.protocolo?.norma })
     setEmitiendo(false)
-    certificadoPDF(equipo, cliente, cert.numero, cert.vencimientoISO)
+    certificadoPDF(equipo, cliente, cert.numero, cert.vencimientoISO, cert)
   }
   const fileRef = useRef<HTMLInputElement>(null)
   const fotos = orden.fotosData ?? []
@@ -379,7 +379,7 @@ function Detalle({ orden, onClose, puedeEditar }: { orden: OrdenServicio; onClos
                     <Row k="Vigente hasta" v={fecha(orden.certificado.vencimientoISO)} />
                     {orden.certificado.firmante && <Row k="Firmado por" v={orden.certificado.firmante} />}
                   </div>
-                  <button className="btn secondary sm" style={{ marginTop: 10 }} onClick={() => certificadoPDF(equipo, cliente, orden.certificado!.numero, orden.certificado!.vencimientoISO)}><Download size={14} /> Descargar certificado PDF</button>
+                  <button className="btn secondary sm" style={{ marginTop: 10 }} onClick={() => certificadoPDF(equipo, cliente, orden.certificado!.numero, orden.certificado!.vencimientoISO, orden.certificado)}><Download size={14} /> Descargar certificado PDF</button>
                 </div>
               ) : emitiendo ? (
                 <div className="card pad" style={{ display: 'grid', gap: 12 }}>

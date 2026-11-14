@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Boxes, ShieldCheck, Smartphone, QrCode, Bell } from 'lucide-react'
+import { Boxes } from 'lucide-react'
 import { HeroTraces } from '../components/Vitals'
 import { useStore, ROLE_LABEL } from '../lib/store'
+import { useCountUp } from '../lib/motion'
 import type { Role } from '../lib/types'
 
 const DEMO: { username: string; rol: Role; desc: string; label?: string }[] = [
@@ -11,6 +12,17 @@ const DEMO: { username: string; rol: Role; desc: string; label?: string }[] = [
   { username: 'tecnico', rol: 'TECNICO', desc: 'Operación en campo' },
   { username: 'cliente', rol: 'CLIENTE', desc: 'Portal del cliente' },
 ]
+
+const PUNTOS = [
+  'Aviso antes de cada vencimiento',
+  'Etiquetas QR por equipo',
+  'Firma digital y certificados en PDF',
+  'Se instala en el celular del técnico',
+]
+
+function Lectura({ n, label }: { n: number; label: string }) {
+  return <div className="lg-read"><b>{useCountUp(n, 1100)}</b><span>{label}</span></div>
+}
 
 export default function Login() {
   const { user, login, db } = useStore()
@@ -25,66 +37,47 @@ export default function Login() {
   }
 
   return (
-    <div style={{ minHeight: '100%', display: 'grid', gridTemplateColumns: '1.05fr 1fr' }} className="login-root">
-      <div style={{ background: '#1b39c4', color: '#eaecfb', padding: 'clamp(32px,5vw,64px)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 28, position: 'relative', overflow: 'hidden', isolation: 'isolate' }} className="login-hero stagger">
+    <div className="login-root lg-root">
+      <div className="lg-hero stagger">
         <HeroTraces />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ width: 46, height: 46, borderRadius: 'var(--radius)', background: 'rgba(255,255,255,.15)', display: 'grid', placeItems: 'center' }}><Boxes size={26} /></span>
-          <div>
-            <b style={{ fontFamily: 'var(--ff-d)', fontWeight: 800, fontSize: 24, color: '#fff', display: 'block', lineHeight: 1 }}>SGEM Plus</b>
-            <small style={{ color: 'rgba(255,255,255,.72)', letterSpacing: '.14em', textTransform: 'uppercase', fontSize: 11 }}>Biotrust</small>
+        <div className="lg-brand">
+          <span className="mk"><Boxes size={24} /></span>
+          <div><b>SGEM Plus</b><small>Biotrust</small></div>
+        </div>
+        <h1>Gestión de equipamiento médico para clínicas y sanatorios</h1>
+        <p>Inventario, certificaciones, mantenimientos y órdenes de servicio en un solo lugar, con portal para cada institución.</p>
+        <div>
+          <div className="lg-kicker">Datos de la demo</div>
+          <div className="lg-strip">
+            <Lectura n={equipos} label="Equipos" />
+            <Lectura n={instituciones} label="Instituciones" />
           </div>
         </div>
-        <h1 style={{ color: '#fff', fontSize: 'clamp(1.8rem,3.4vw,2.6rem)', fontWeight: 800, lineHeight: 1.08, maxWidth: '16ch' }}>
-          Gestión de equipamiento médico para clínicas y sanatorios
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,.86)', fontSize: 16, maxWidth: '42ch', margin: 0 }}>
-          Inventario, certificaciones, mantenimientos y órdenes de servicio en un solo lugar, con portal para cada institución.
-        </p>
-        <p style={{ color: '#fff', fontSize: 15, fontWeight: 600, margin: 0 }} className="mono">
-          La demo trae {equipos} equipos de {instituciones} instituciones.
-        </p>
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 12 }}>
-          {[
-            { icon: Bell, t: 'Aviso antes de cada vencimiento' },
-            { icon: QrCode, t: 'Etiquetas QR por equipo' },
-            { icon: ShieldCheck, t: 'Firma digital y certificados en PDF' },
-            { icon: Smartphone, t: 'Se instala en el celular del técnico' },
-          ].map(({ icon: Icon, t }) => (
-            <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 11, color: '#fff', fontSize: 15 }}>
-              <span style={{ width: 30, height: 30, borderRadius: 'var(--radius-sm)', background: 'rgba(255,255,255,.12)', display: 'grid', placeItems: 'center' }}><Icon size={16} /></span>
-              {t}
-            </li>
-          ))}
+        <ul className="lg-list">
+          {PUNTOS.map((t) => <li key={t}>{t}</li>)}
         </ul>
       </div>
 
-      <div style={{ display: 'grid', placeItems: 'center', padding: 24 }}>
-        <div style={{ width: 'min(400px,100%)', display: 'grid', gap: 18 }}>
+      <div className="lg-side">
+        <div className="lg-box">
           <div>
-            <h2 style={{ fontSize: 22, fontWeight: 750 }}>Entrar a la demo</h2>
-            <p className="muted" style={{ marginTop: 4 }}>Elegí un perfil para recorrer la plataforma. Los datos son de demostración y viven en este navegador.</p>
+            <div className="lg-kicker ink">Acceso</div>
+            <h2>Entrar a la demo</h2>
+            <p className="muted" style={{ marginTop: 12 }}>Elegí un perfil para recorrer la plataforma. Los datos son de demostración y viven en este navegador.</p>
           </div>
-          <div style={{ display: 'grid', gap: 10 }} className="stagger">
+          <div className="lg-rows stagger" role="radiogroup" aria-label="Perfil">
             {DEMO.map((d) => (
-              <button
-                key={d.username}
-                onClick={() => setSel(d.username)}
-                className="card"
-                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 14, textAlign: 'left', borderColor: sel === d.username ? 'var(--brand)' : undefined, boxShadow: sel === d.username ? '0 0 0 3px var(--brand-soft)' : undefined }}
-              >
-                <span style={{ width: 38, height: 38, borderRadius: 'var(--radius)', display: 'grid', placeItems: 'center', background: 'var(--brand-soft)', color: 'var(--brand)', fontWeight: 700, fontFamily: 'var(--ff-d)' }}>
-                  {d.username[0].toUpperCase()}
+              <button key={d.username} role="radio" aria-checked={sel === d.username} onClick={() => setSel(d.username)} onDoubleClick={() => enter(d.username)} className={`lg-row ${sel === d.username ? 'on' : ''}`}>
+                <span className="led" />
+                <span>
+                  <b>{d.label ?? ROLE_LABEL[d.rol]}</b>
+                  <span className="rol">{d.label ? `${ROLE_LABEL[d.rol]} · ${d.desc}` : d.desc}</span>
                 </span>
-                <div style={{ flex: 1 }}>
-                  <b style={{ textTransform: 'capitalize' }}>{d.label ?? ROLE_LABEL[d.rol]}</b>
-                  <div className="faint small">{d.label ? `${ROLE_LABEL[d.rol]} · ${d.desc}` : d.desc}</div>
-                </div>
-                <span className="faint small mono">{d.username}</span>
+                <span className="usr">{d.username}</span>
               </button>
             ))}
           </div>
-          <button className="btn primary block" style={{ height: 44 }} onClick={() => enter(sel)}>Ingresar</button>
+          <button className="btn primary block" style={{ height: 48 }} onClick={() => enter(sel)}>Ingresar</button>
         </div>
       </div>
     </div>
